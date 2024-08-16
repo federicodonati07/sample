@@ -6,18 +6,19 @@ import Link from 'next/link';
 import { GoHome } from "react-icons/go";
 import { AiOutlineProduct } from "react-icons/ai";
 import { CiUser } from "react-icons/ci";
-import Catalog from '@/components/home/catalog';
+import Login from '@/components/auth/login';
 
-const Page = () => {
-    const [isVisible, setIsVisible] = useState(false);
 
-    const toggleVisibilityMenu = () => {
-        setIsVisible(!isVisible);
-    };
+const AuthPage = () => {
+  const [isVisible, setIsVisible] = useState(false);
 
-    return (
-        <>
-            <div className='flex flex-row justify-center items-center  text-white relative'>
+  const toggleVisibilityMenu = () => {
+      setIsVisible(!isVisible);
+  };
+
+  return (
+    <>
+      <div className='flex flex-row justify-center items-center  text-white relative'>
                 <span className='m-2 text-2xl tracking-widest'>SAMPLE</span>
                 <div className="absolute top-0 right-0 m-4">
                     <CiMenuBurger
@@ -52,11 +53,11 @@ const Page = () => {
             </div>
 
             <div
-            className={`text-white flex flex-row ml-2 mt-10 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
-                <Catalog></Catalog>
+            className={`text-white justify-center items-center flex flex-row ml-2 mt-52 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
+                <Login></Login>
             </div>
-        </>
-    );
-};
+    </>
+  )
+}
 
-export default Page;
+export default AuthPage
