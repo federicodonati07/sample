@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { GoHome } from "react-icons/go";
 import { AiOutlineProduct } from "react-icons/ai";
 import { CiUser } from "react-icons/ci";
+import Catalog from '@/components/home/catalog';
 
 const Page = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -53,8 +54,8 @@ const Page = () => {
             </div>
 
             <div
-            className={`text-white flex flex-row m-20 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
-                
+            className={`text-white flex flex-row ml-2 mt-10 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
+                <Catalog></Catalog>
             </div>
         </>
     );
