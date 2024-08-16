@@ -28,7 +28,6 @@ const Page = () => {
                 </div>
             </div>
             <div 
-                onClick={toggleVisibilityMenu}
                 className={`overflow-hidden text-white border border-slate-50 rounded-lg absolute top-0 left-0 w-full transition-all duration-500 ease-in-out ${isVisible ? 'max-h-screen' : 'max-h-0'}`}>
                 <div className="flex flex-col items-center p-6 m-6 space-y-4 font-black">
                     <IoCloseOutline
