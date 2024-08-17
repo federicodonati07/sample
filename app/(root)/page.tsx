@@ -22,7 +22,7 @@ const Page = () => {
                 <div className="absolute top-0 right-0 m-4">
                     <CiMenuBurger
                         onClick={toggleVisibilityMenu}
-                        className={`text-2xl transition-opacity duration-300 ${isVisible ? 'opacity-0' : 'opacity-100'}`}
+                        className={`cursor-pointer text-2xl transition-opacity duration-300 ${isVisible ? 'opacity-0' : 'opacity-100'}`}
                     />
                 </div>
             </div>
@@ -31,7 +31,7 @@ const Page = () => {
                 <div className="flex flex-col items-center p-6 m-6 space-y-4 font-black">
                     <IoCloseOutline
                         onClick={toggleVisibilityMenu}
-                        className={`text-4xl transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+                        className={`cursor-pointer text-4xl transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
                     />
                     <Link href="/">
                         <span className="hover:underline flex flex-row">

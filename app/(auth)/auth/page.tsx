@@ -32,7 +32,7 @@ const Page = () => {
                 <div className="absolute top-0 right-0 m-4">
                     <CiMenuBurger
                         onClick={toggleVisibilityMenu}
-                        className={`text-2xl transition-opacity duration-300 ${isVisible ? 'opacity-0' : 'opacity-100'}`}
+                        className={`cursor-pointer text-2xl transition-opacity duration-300 ${isVisible ? 'opacity-0' : 'opacity-100'}`}
                     />
                 </div>
             </div>
@@ -41,14 +41,14 @@ const Page = () => {
                 <div className="flex flex-col items-center p-6 m-6 space-y-4 font-black">
                     <IoCloseOutline
                         onClick={toggleVisibilityMenu}
-                        className={`text-4xl transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+                        className={`cursor-pointer text-4xl transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
                     />
                     <Link href="/">
                         <span className="hover:underline flex flex-row">
                             <GoHome className='mr-2 text-2xl'/>Home
                         </span>
                     </Link>
-                    <Link href="/login">
+                    <Link href="/auth">
                         <span className="hover:underline flex flex-row">
                             <CiUser className='mr-2 text-2xl'/>Profile
                         </span>
@@ -62,25 +62,33 @@ const Page = () => {
             </div>
 
             <div
-            className={`text-white justify-center items-center flex flex-row ml-2 mt-52 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
+            className={`text-white justify-center items-center flex flex-row ml-2 mt-36 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
                 {isMethod === "login" ? (
                     <>
                         <div className='flex flex-col justify-center items-center text-center'>
                             <span className='text-xl tracking-widest'>LOGIN</span>
+                            
+                            <div className='m-1 flex justify-center items-center'>
+                                <Login></Login>
+                            </div>
+
                             <span className='text-xs'>don't have an account yet? 
                                 <span onClick={toggleMethod} className='underline cursor-pointer'> SIGNUP</span>
                             </span>
-                            <Login></Login>
                         </div>  
                     </>
                 ) : isMethod === "signup" ? (
                     <>
                         <div className='flex flex-col justify-center items-center text-center'>
                             <span className='text-xl tracking-widest'>SIGNUP</span>
+                            
+                            <div className='m-1 flex justify-center items-center'>
+                                <Signup></Signup>
+                            </div>
+                            
                             <span className='text-xs'>are you already a member? 
                                 <span onClick={toggleMethod} className='underline cursor-pointer'> LOGIN</span>
                             </span>
-                            <Signup></Signup>
                         </div>
                     </>
                 ) : ""}
