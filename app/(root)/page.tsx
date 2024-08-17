@@ -38,7 +38,7 @@ const Page = () => {
                             <GoHome className='mr-2 text-2xl'/>Home
                         </span>
                     </Link>
-                    <Link href="/login">
+                    <Link href="/auth">
                         <span className="hover:underline flex flex-row">
                             <CiUser className='mr-2 text-2xl'/>Profile
                         </span>

@@ -7,18 +7,27 @@ import { GoHome } from "react-icons/go";
 import { AiOutlineProduct } from "react-icons/ai";
 import { CiUser } from "react-icons/ci";
 import Login from '@/components/auth/login';
+import Signup from '@/components/auth/signup';
 
+const Page = () => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [isMethod, setIsMethod] = useState ("login")
 
-const AuthPage = () => {
-  const [isVisible, setIsVisible] = useState(false);
+    const toggleMethod = ()=>{
+        if(isMethod == "login"){
+            setIsMethod("signup")
+        }else{
+            setIsMethod("login")
+        }
+    }
 
-  const toggleVisibilityMenu = () => {
-      setIsVisible(!isVisible);
-  };
+    const toggleVisibilityMenu = () => {
+        setIsVisible(!isVisible);
+    };
 
-  return (
-    <>
-      <div className='flex flex-row justify-center items-center  text-white relative'>
+    return (
+        <>
+            <div className='flex flex-row justify-center items-center  text-white relative'>
                 <span className='m-2 text-2xl tracking-widest'>SAMPLE</span>
                 <div className="absolute top-0 right-0 m-4">
                     <CiMenuBurger
@@ -54,10 +63,30 @@ const AuthPage = () => {
 
             <div
             className={`text-white justify-center items-center flex flex-row ml-2 mt-52 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
-                <Login></Login>
+                {isMethod === "login" ? (
+                    <>
+                        <div className='flex flex-col justify-center items-center text-center'>
+                            <span className='text-xl tracking-widest'>LOGIN</span>
+                            <span className='text-xs'>don't have an account yet? 
+                                <span onClick={toggleMethod} className='underline cursor-pointer'> SIGNUP</span>
+                            </span>
+                            <Login></Login>
+                        </div>  
+                    </>
+                ) : isMethod === "signup" ? (
+                    <>
+                        <div className='flex flex-col justify-center items-center text-center'>
+                            <span className='text-xl tracking-widest'>SIGNUP</span>
+                            <span className='text-xs'>are you already a member? 
+                                <span onClick={toggleMethod} className='underline cursor-pointer'> LOGIN</span>
+                            </span>
+                            <Signup></Signup>
+                        </div>
+                    </>
+                ) : ""}
             </div>
-    </>
-  )
-}
+        </>
+    );
+};
 
-export default AuthPage
+export default Page;
