@@ -5,8 +5,17 @@ import { Label } from '@radix-ui/react-label'
 import { FcGoogle } from "react-icons/fc";
 import { useRouter } from 'next/navigation';
 import supabase from '@/lib/supabase/supabaseClient';
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 
 const Login = () => {
+  const [error, setError] = useState('')
+  const [isError, setIsError] = useState(false)
+
   const [email, setEmail] = useState('')
   const [checkEmail, setCheckEmail] = useState(false)
 
@@ -42,10 +51,37 @@ const Login = () => {
     }
   }
 
+  const handleLogin = async()=>{
+    if(checkEmail &&checkPassword){
+      const {data, error} = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      })
+
+      if(error){
+        setError("error during login conncetion")
+        setIsError(true)
+      }else{
+        setError("")
+        setIsError(false)
+        router.push("/private")
+      }
+    }else{
+      setError("fill in all fields correctly")
+      setIsError(true)
+    }
+  }
 
   return (
     <>
         <div className='m-1 w-full'>
+            <Alert variant="destructive" className={`${isError ? 'block' : 'hidden'}`}>
+              <ExclamationTriangleIcon />
+              <AlertTitle>Error: </AlertTitle>
+              <AlertDescription>
+                {error}
+              </AlertDescription>
+            </Alert>
             <Label htmlFor='email' className={`text-sm ${checkEmail === false ? 'text-slate-50' : 'text-green-600'}`}>email <span className='text-red-600 text-xs font-black'>*</span></Label>
             <Input
               value={email}
@@ -71,7 +107,7 @@ const Login = () => {
                     Login with Google
                 </Button>
                 <span className='m-2 my-3'>or</span>
-                <Button className='bg-slate-50 text-slate-950 mt-2 font-black'>Login</Button>
+                <Button onClick={handleLogin} className='bg-slate-50 text-slate-950 mt-2 font-black'>Login</Button>
             </div>
         </div>
     </>

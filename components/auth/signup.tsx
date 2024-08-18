@@ -102,7 +102,7 @@ const Signup = () => {
         console.log(error)
         setIsError(true)
       }else{
-        const {data, error} = await supabase.from("profiles").insert([{name:name, surname:surname, email:email, role:""}])
+        const {data, error} = await supabase.from("profiles").insert([{name:name, surname:surname, email:email, role:"member", orders:0}])
         if(error){
           setError("error during signin conncetion")
           console.log(error)
