@@ -72,6 +72,23 @@ const Login = () => {
     }
   }
 
+  const handleGoogleLogin = async()=>{
+    const {data, error} = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    })
+
+    
+
+    if(error){
+      setError("error during login conncetion")
+      setIsError(true)
+    }else{
+      setError("")
+      setIsError(false)
+      router.push("/private")
+    }
+  }
+
   return (
     <>
         <div className='m-1 w-full'>
@@ -102,7 +119,7 @@ const Login = () => {
               className={`${checkPassword === false ? 'border-slate-50' : 'border-green-600'}`}></Input>
 
             <div className='flex flex-row justify-center items-center mt-2'>
-                <Button className='bg-slate-50 text-slate-950 mt-2 font-black'>
+                <Button onClick={handleGoogleLogin} className='bg-slate-50 text-slate-950 mt-2 font-black'>
                     <FcGoogle className='m-1' />
                     Login with Google
                 </Button>

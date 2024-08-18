@@ -10,16 +10,17 @@ import Link from 'next/link';
 import { GoHome } from "react-icons/go";
 import { AiOutlineProduct } from "react-icons/ai";
 import { CiUser } from "react-icons/ci";
-import { MdOutlineEdit } from "react-icons/md";
-import { MdOutlineDelete } from "react-icons/md";
+import UserInfo from "@/components/auth/private/userInfo"
+import UserManagement from "@/components/auth/private/userManagement"
 
 const Page = ()=>{
     const [user, setUser] = useState<User | null>(null)
-    const [name, setName] = useState('')
-    const [surname, setSurname] = useState('')
-    const [email, setEmail] = useState('')
-    const [role, setRole] = useState('')
-    const [orders, setOrders] = useState('')
+    const [name, setName] = useState('---')
+    const [surname, setSurname] = useState('---')
+    const [email, setEmail] = useState('---')
+    const [role, setRole] = useState('---')
+    const [orders, setOrders] = useState('---')
+    const [uuid, setUuid] = useState('')
 
     const router = useRouter()
 
@@ -44,7 +45,6 @@ const Page = ()=>{
         } else {
             setName(data.name)
             setSurname(data.surname)
-            setEmail(data.email)
             setRole(data.role)
             setOrders(data.orders)
         }
@@ -56,6 +56,8 @@ const Page = ()=>{
             
             if(session){
                 setUser(session.user)
+                setUuid(session.user.id)
+                setEmail(session.user.email!)
                 getUserInfo(session.user.email)
             }else{
                 router.push("/auth")
@@ -115,34 +117,18 @@ const Page = ()=>{
                 
                 <div className="border border-slate-50 rounded-lg w-full m-2">
                     <div className="grid grid-rows-2 gap-2">
-                        <div className="border-slate-50 border-b">
-                            <div className="flex flex-col justify-center items-center text-center">
-                                <div className="p-2">
-                                    <span className="font-black">User Information</span>
-                                </div>
-                                <div className="overflow-auto flex flex-col justify-start items-start text-start p-2 ">
-                                    <span>Name: <span className="font-black">{name}</span></span>
-                                    <span>Surname: <span className="font-black">{surname}</span></span>
-                                    <span>Email: <span className="font-black">{email}</span></span>
-                                    <span>Role: <span className={`font-black ${role === "admin" ? 'text-cyan-600' : role === "veteran" ? 'text-violet-600' : role === "member" ? 'text-green-600' : role === "banned" ? "text-red-600" : ""}`}>{role}</span></span>
-                                    <span>Orders: <span className="font-black">{orders}</span></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div>
-                                <div className="flex flex-col justify-center items-center text-center">
-                                    <div className="p-2">
-                                        <span className="font-black">User Management</span>
-                                    </div>
-                                    <div className="overflow-auto grid grid-cols-2 gap-2">
-                                        <Button className="bg-yellow-600"><MdOutlineEdit className="text-xl font-black" />Edit Profile</Button>
-                                        <Button className="bg-red-600"><MdOutlineDelete className="text-xl font-black"/> Delete Profile</Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <UserInfo
+                            name={name}
+                            surname={surname}
+                            email={email}
+                            role={role}
+                            orders={orders}>
+                            
+                        </UserInfo>
+                        <UserManagement uuid={uuid}></UserManagement>
+                    </div>
+                    <div className="flex justify-center items-center text-center">
+                        <span>User ID: {uuid}</span>
                     </div>
                 </div>
             </div>
