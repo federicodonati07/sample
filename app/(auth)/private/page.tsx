@@ -10,7 +10,8 @@ import Link from 'next/link';
 import { GoHome } from "react-icons/go";
 import { AiOutlineProduct } from "react-icons/ai";
 import { CiUser } from "react-icons/ci";
-import { GrContactInfo } from "react-icons/gr";
+import { MdOutlineEdit } from "react-icons/md";
+import { MdOutlineDelete } from "react-icons/md";
 
 const Page = ()=>{
     const [user, setUser] = useState<User | null>(null)
@@ -109,19 +110,40 @@ const Page = ()=>{
             </div>
 
             <div
-            className={`text-white flex flex-row m-2 p-2 mt-10 transition-all duration-250 ease-in border border-slate-50 rounded-lg ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
+            className={`text-white flex flex-row m-2 p-2 mt-10 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
                 <Button onClick={handleLogout} className="z-51 absolute top-0 left-0 m-2 bg-slate-50 text-slate-950 font-black">Logout</Button>
-                <span className="flex flex-row justify-center items-center text-center font-black">User Information</span>
-                <div className="overflow-auto flex flex-col m-2 border-l p-2 border-l-slate-50">
-                    <span>Name: <span className="text-md font-black">{name}</span></span>
-                    <span>Surname: <span className="text-md font-black">{surname}</span></span>
-                    <span>Email: <span className="text-md font-black">{email}</span></span>
-                    <span>Status: <span className={`text-md font-black 
-                            ${role === "member" ? 'text-green-600' : role === "admin" ? 'text-yellow-600' : role === "banned" ? 'text-red-600' : role === "veteran" ? 'text-violet-600' : "text-slate-50"}`}>
-                            {role}
-                        </span>
-                    </span>
-                    <span>Orders: <span className="text-md font-black">{orders}</span></span>
+                
+                <div className="border border-slate-50 rounded-lg w-full m-2">
+                    <div className="grid grid-rows-2 gap-2">
+                        <div className="border-slate-50 border-b">
+                            <div className="flex flex-col justify-center items-center text-center">
+                                <div className="p-2">
+                                    <span className="font-black">User Information</span>
+                                </div>
+                                <div className="overflow-auto flex flex-col justify-start items-start text-start p-2 ">
+                                    <span>Name: <span className="font-black">{name}</span></span>
+                                    <span>Surname: <span className="font-black">{surname}</span></span>
+                                    <span>Email: <span className="font-black">{email}</span></span>
+                                    <span>Role: <span className={`font-black ${role === "admin" ? 'text-cyan-600' : role === "veteran" ? 'text-violet-600' : role === "member" ? 'text-green-600' : role === "banned" ? "text-red-600" : ""}`}>{role}</span></span>
+                                    <span>Orders: <span className="font-black">{orders}</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div>
+                                <div className="flex flex-col justify-center items-center text-center">
+                                    <div className="p-2">
+                                        <span className="font-black">User Management</span>
+                                    </div>
+                                    <div className="overflow-auto grid grid-cols-2 gap-2">
+                                        <Button className="bg-yellow-600"><MdOutlineEdit className="text-xl font-black" />Edit Profile</Button>
+                                        <Button className="bg-red-600"><MdOutlineDelete className="text-xl font-black"/> Delete Profile</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </>
@@ -129,3 +151,5 @@ const Page = ()=>{
 }
 
 export default Page
+
+
