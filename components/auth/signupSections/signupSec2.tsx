@@ -1,31 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { isValidNumber, parsePhoneNumber } from 'libphonenumber-js';
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert";
 import { Country, State, City } from 'country-state-city';
 
-const SignupSec2 = () => {
-    const [error, setError] = useState('');
-    const [isError, setIsError] = useState(false);
-
-    // Input variables
-    const [shippingAddress, setShippingAddress] = useState('');
-    const [houseNumber, setHouseNumber] = useState('');
-    const [postalCode, setPostalCode] = useState('');
-
-    // State variables to capture the selected values
-    const [selectedCountry, setSelectedCountry] = useState<string>('');
-    const [selectedState, setSelectedState] = useState<string>('');
-    const [selectedCity, setSelectedCity] = useState<string>('');
-    const [phoneNumber, setPhoneNumber] = useState<string>('');
-
-    // List of countries, states, and cities
+const SignupSec2 = ({
+    shippingAddress,
+    setShippingAddress,
+    houseNumber,
+    setHouseNumber,
+    postalCode,
+    setPostalCode,
+    moreInfo,
+    setMoreInfo,
+    selectedCountry,
+    setSelectedCountry,
+    selectedState,
+    setSelectedState,
+    selectedCity,
+    setSelectedCity,
+    phoneNumber,
+    setPhoneNumber,
+    apartamentNumber,
+    setApartamentNumber,
+    name,
+    setName,
+    surname,
+    setSurname
+}) => {
     const [countries, setCountries] = useState<Country[]>(Country.getAllCountries());
     const [states, setStates] = useState<State[]>([]);
     const [cities, setCities] = useState<City[]>([]);
@@ -46,7 +47,6 @@ const SignupSec2 = () => {
         }
     }, [selectedState, selectedCountry]);
 
-    // Event handlers to update state variables
     const handleCountryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedCountry(event.target.value);
         setSelectedState('');
@@ -63,49 +63,33 @@ const SignupSec2 = () => {
     };
 
     const handlePhoneNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        setPhoneNumber(value);
-        
-        try {
-            const phone = parsePhoneNumber(value);
-            if (phone && isValidNumber(phone.number)) {
-                setError('');
-                setIsError(false);
-            } else {
-                setIsError(true);
-                setError('Invalid phone number');
-            }
-        } catch {
-            setError('Invalid phone number');
-            setIsError(true);
-        }
-    };
-
-    // Handlers for additional inputs
-    const handleShippingAddress = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setShippingAddress(e.target.value);
-    };
-
-    const handleHouseNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setHouseNumber(e.target.value);
-    };
-
-    const handlePostalCode = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setPostalCode(e.target.value);
+        setPhoneNumber(event.target.value);
     };
 
     return (
         <>
             <div className='space-y-2'>
-                <Alert variant="destructive" className={`${isError ? 'block' : 'hidden'}`}>
-                    <ExclamationTriangleIcon />
-                    <AlertTitle>Error: </AlertTitle>
-                    <AlertDescription>
-                        {error}
-                    </AlertDescription>
-                </Alert>
-
                 <form className='space-y-4'>
+                    <div className='grid grid-cols-2 gap-2'>
+                        <div>
+                            <Label htmlFor='name'>Name</Label>
+                            <Input
+                                id="name"
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor='surname'>Surname</Label>
+                            <Input
+                                id="surname"
+                                type="text"
+                                value={surname}
+                                onChange={(e) => setSurname(e.target.value)}
+                            />
+                        </div>
+                    </div>
                     <div className='grid grid-cols-3 gap-2'>
                         <div>
                             <Label htmlFor='country'>Country</Label>
@@ -161,23 +145,14 @@ const SignupSec2 = () => {
                         </div>
                     </div>
 
-                    <div className='grid grid-cols-3 gap-2'>
+                    <div className='grid grid-cols-2 gap-2'>
                         <div>
-                            <Label htmlFor='shippingAddress'>Shipping Address</Label>
+                            <Label htmlFor='shippingAddress'>Address</Label>
                             <Input
                                 id="shippingAddress"
                                 type="text"
                                 value={shippingAddress}
-                                onChange={handleShippingAddress}
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor='houseNumber'>House Number</Label>
-                            <Input
-                                id="houseNumber"
-                                type="text"
-                                value={houseNumber}
-                                onChange={handleHouseNumber}
+                                onChange={(e) => setShippingAddress(e.target.value)}
                             />
                         </div>
                         <div>
@@ -186,7 +161,28 @@ const SignupSec2 = () => {
                                 id="postalCode"
                                 type="text"
                                 value={postalCode}
-                                onChange={handlePostalCode}
+                                onChange={(e) => setPostalCode(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className='grid grid-cols-2 gap-2'>
+                         <div>
+                            <Label htmlFor='houseNumber'>House Number</Label>
+                            <Input
+                                id="houseNumber"
+                                type="text"
+                                value={houseNumber}
+                                onChange={(e) => setHouseNumber(e.target.value)}
+                            />
+                        </div>
+                         <div>
+                            <Label htmlFor='apartamentNumber'>Apartament number</Label>
+                            <Input
+                                id="apartamentNumber"
+                                type="text"
+                                value={apartamentNumber}
+                                onChange={(e) => setApartamentNumber(e.target.value)}
                             />
                         </div>
                     </div>
@@ -198,6 +194,16 @@ const SignupSec2 = () => {
                             type='tel'
                             value={phoneNumber}
                             onChange={handlePhoneNumberChange}
+                            className='w-full p-2 border border-gray-300 rounded'
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor='moreInfo'>More Info</Label>
+                        <Input
+                            id='moreInfo'
+                            type='textarea'
+                            value={moreInfo}
+                            onChange={(e) => setMoreInfo(e.target.value)}
                             className='w-full p-2 border border-gray-300 rounded'
                         />
                     </div>

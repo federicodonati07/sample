@@ -12,6 +12,7 @@ import { AiOutlineProduct } from "react-icons/ai";
 import { CiUser } from "react-icons/ci";
 import UserInfo from "@/components/auth/private/userInfo"
 import UserManagement from "@/components/auth/private/userManagement"
+import ShippingInfo from "@/components/auth/private/shippingInfo"
 
 const Page = ()=>{
     const [user, setUser] = useState<User | null>(null)
@@ -21,6 +22,16 @@ const Page = ()=>{
     const [role, setRole] = useState('---')
     const [orders, setOrders] = useState('---')
     const [uuid, setUuid] = useState('')
+
+    const [country, setCountry] = useState('---')
+    const [state, setState] = useState('---')
+    const [city, setCity] = useState('---')
+    const [shippingAddress, setShippingAddress] = useState('---')
+    const [houseNumber, setHouseNumber] = useState('---')
+    const [apartamentNumber, setApartamentNumber] = useState('---')
+    const [postalCode, setPostalCode] = useState('---')
+    const [phoneNumber, setPhoneNumber] = useState('---')
+    const [moreInfo, setMoreInfo] = useState('---')
 
     const router = useRouter()
 
@@ -67,6 +78,30 @@ const Page = ()=>{
         getSession()
 
     }, [router])
+
+    useEffect(()=>{
+        const handleFetchShipping = async()=>{
+            const {data, error} = await supabase
+                .from("shipping_info")
+                .select("*")
+                .eq("profile_uuid", uuid)
+                .single()
+
+            if(data){
+                setCountry(data.country)
+                setState(data.state)
+                setCity(data.city)
+                setShippingAddress(data.address)
+                setHouseNumber(data.house_number)
+                setApartamentNumber(data.apartament_number)
+                setPostalCode(data.postal_code)
+                setPhoneNumber(data.phone_number)
+                setMoreInfo(data.more_info)
+            }
+        }
+
+        handleFetchShipping()
+    }, [uuid])
 
 
     const handleLogout = async()=>{
@@ -116,7 +151,7 @@ const Page = ()=>{
                 <Button onClick={handleLogout} className="z-51 absolute top-0 left-0 m-2 bg-slate-50 text-slate-950 font-black">Logout</Button>
                 
                 <div className="border border-slate-50 rounded-lg w-full m-2">
-                    <div className="grid grid-rows-2 gap-2">
+                    <div className="grid grid-rows-3 gap-2">
                         <UserInfo
                             name={name}
                             surname={surname}
@@ -125,7 +160,18 @@ const Page = ()=>{
                             orders={orders}>
                             
                         </UserInfo>
-                        <UserManagement uuid={uuid}></UserManagement>
+                        <ShippingInfo
+                            country={country}
+                            state={state}
+                            city={city}
+                            address={shippingAddress}
+                            house_number={houseNumber}
+                            apartament_number={apartamentNumber}
+                            postal_code={postalCode}
+                            phone_number={phoneNumber}
+                            more_info={moreInfo}>
+                        </ShippingInfo>
+                        <UserManagement uuid={uuid} email={user.email}></UserManagement>
                     </div>
                     <div className="flex justify-center items-center text-center">
                         <span>User ID: {uuid}</span>
