@@ -9,7 +9,8 @@ const ShippingInfo = ({
   apartament_number,
   postal_code,
   phone_number,
-  more_info
+  more_info,
+  email,
 }) => {
   return (
     <div className="border-slate-50 border-b">

@@ -169,7 +169,8 @@ const Page = ()=>{
                             apartament_number={apartamentNumber}
                             postal_code={postalCode}
                             phone_number={phoneNumber}
-                            more_info={moreInfo}>
+                            more_info={moreInfo}
+                            email={email}>
                         </ShippingInfo>
                         <UserManagement uuid={uuid} email={user.email}></UserManagement>
                     </div>

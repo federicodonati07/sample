@@ -206,10 +206,13 @@ const UserManagement = ({ uuid, email }) => {
           </Button>
           <AlertDialog>
             <AlertDialogTrigger>
-              <Button className="bg-blue-600">
+              {isShipping ? (
+                <Button className="bg-blue-600">
                 <FaShippingFast className="text-xl font-black" />
-                {isShipping ? 'Add Shipping Info' : 'Edit Shipping Info'}
-              </Button>
+                  Add shipping information
+                </Button>
+              ) : ""}
+              
             </AlertDialogTrigger>
             <AlertDialogContent className="bg-slate-950">
               <AlertDialogHeader>
@@ -248,14 +251,9 @@ const UserManagement = ({ uuid, email }) => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel className="text-slate-950 font-black">Cancel</AlertDialogCancel>
-                <AlertDialogAction>
-                    <Button onClick={handleShipping} className={`bg-blue-600 font-black ${isShipping ? 'block' : 'hidden'}`}>
-                        Add Shipping Info
-                    </Button>
-                    <Button onClick={handleShipping} className={`bg-blue-600 font-black ${isShipping ? 'hidden' : 'block'}`}>
-                        Edit Shipping Info
-                    </Button>
-                </AlertDialogAction>
+                  <Button onClick={handleShipping} className={`bg-blue-600 font-black ${isShipping ? 'block' : 'hidden'}`}>
+                      Add Shipping Info
+                  </Button>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
