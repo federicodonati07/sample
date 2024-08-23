@@ -19,7 +19,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { isValidNumber, parsePhoneNumber } from 'libphonenumber-js';
 import { useRouter } from 'next/navigation';
 
-const UserManagement = ({ uuid, email }) => {
+const AddShippingInfo = ({ uuid, email }) => {
   const [shippingAddress, setShippingAddress] = useState('');
   const [houseNumber, setHouseNumber] = useState('');
   const [postalCode, setPostalCode] = useState('');
@@ -122,7 +122,7 @@ const UserManagement = ({ uuid, email }) => {
               setError(`Error: ${shippingError.message}`);
               setIsError(true);
             } else {
-              router.refresh()
+              window.location.href = "/private"
             }
           } else {
             // Insert profile if it does not exist
@@ -162,31 +162,11 @@ const UserManagement = ({ uuid, email }) => {
               setError(`Error: ${insertShippingError.message}`);
               setIsError(true);
             } else {
-              router.refresh()
+              window.location.href = "/private"
             }
           }
         } else {  
-            const { data, error } = await supabase
-                .from('shipping_info')
-                .update([{
-                    country: selectedCountry, 
-                    state: selectedState,
-                    city: selectedCity,
-                    address: shippingAddress,
-                    house_number: houseNumber,
-                    apartament_number: apartamentNumber, // Ensure this is the correct column name
-                    postal_code: postalCode,
-                    phone_number: phoneNumber,
-                    more_info: moreInfo
-                }])
-                .eq('profile_uuid', uuid);
-
-            if (error) {
-                setError('Error updating shipping information');
-                setIsError(true);
-            }else{
-              router.refresh()
-            }
+          window.location.href = "/private"
         }
       } catch (err) {
         console.error('Error during data insertion:', err);
@@ -200,12 +180,12 @@ const UserManagement = ({ uuid, email }) => {
     <div className="p-4">
       <div className="flex flex-col items-center text-center">
         <h2 className="font-black mb-2">User Management</h2>
-        <div className="overflow-auto justify-center items-center grid grid-rows-2 md:grid-cols-2 mt-5 gap-2">
+        <div className="overflow-auto flex flex-row justify-center items-center mt-5">
           <AlertDialog>
             <AlertDialogTrigger>
               {isShipping ? (
-                <Button className="bg-blue-600">
-                <FaShippingFast className="text-xl font-black" />
+                <Button className="bg-slate-50 text-slate-950">
+                  <FaShippingFast className="text-xl font-black" />
                   Add shipping information
                 </Button>
               ) : ""}
@@ -247,7 +227,7 @@ const UserManagement = ({ uuid, email }) => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel className="text-slate-950 font-black">Cancel</AlertDialogCancel>
-                  <Button onClick={handleShipping} className={`bg-blue-600 font-black ${isShipping ? 'block' : 'hidden'}`}>
+                  <Button onClick={handleShipping} className={`bg-slate-50 text-slate-950 font-black ${isShipping ? 'block' : 'hidden'}`}>
                       Add Shipping Info
                   </Button>
               </AlertDialogFooter>
@@ -259,4 +239,4 @@ const UserManagement = ({ uuid, email }) => {
   );
 };
 
-export default UserManagement;
+export default AddShippingInfo;

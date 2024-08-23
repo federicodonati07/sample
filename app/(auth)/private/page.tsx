@@ -11,8 +11,8 @@ import { GoHome } from "react-icons/go";
 import { AiOutlineProduct } from "react-icons/ai";
 import { CiUser } from "react-icons/ci";
 import UserInfo from "@/components/auth/private/userInfo"
-import UserManagement from "@/components/auth/private/userManagement"
-import ShippingInfo from "@/components/auth/private/shippingInfo"
+import EditShippingInfo from "@/components/auth/private/editShippingInfo"
+import AddShippingInfo from "@/components/auth/private/addShippingInfo"
 
 const Page = ()=>{
     const [user, setUser] = useState<User | null>(null)
@@ -33,6 +33,7 @@ const Page = ()=>{
     const [phoneNumber, setPhoneNumber] = useState('---')
     const [moreInfo, setMoreInfo] = useState('---')
 
+    const [isShippingSetted, setIsShippingSetted] = useState(false)
     const router = useRouter()
 
     //  FUNCTION OF CODE BELOW  //
@@ -62,6 +63,20 @@ const Page = ()=>{
     }
 
     useEffect(()=>{
+        const fetchShippingInfo = async(uuid)=>{
+            const {data, error} = await supabase
+                .from("shipping_info")
+                .select("*")
+                .eq("profile_uuid", uuid)
+
+            console.log(data, uuid)
+            if(data?.length == 0){
+                setIsShippingSetted(false)
+            }else{
+                setIsShippingSetted(true)
+            }
+        }
+
         const getSession = async()=>{
             const {data:{session}} = await supabase.auth.getSession()
             
@@ -70,6 +85,7 @@ const Page = ()=>{
                 setUuid(session.user.id)
                 setEmail(session.user.email!)
                 getUserInfo(session.user.email)
+                fetchShippingInfo(session.user.id)
             }else{
                 router.push("/auth")
             }
@@ -151,7 +167,7 @@ const Page = ()=>{
                 <Button onClick={handleLogout} className="z-51 absolute top-0 left-0 m-2 bg-slate-50 text-slate-950 font-black">Logout</Button>
                 
                 <div className="border border-slate-50 rounded-lg w-full m-2">
-                    <div className="grid grid-rows-3 gap-2">
+                    <div className="flex flex-col gap-2">
                         <UserInfo
                             name={name}
                             surname={surname}
@@ -160,19 +176,26 @@ const Page = ()=>{
                             orders={orders}>
                             
                         </UserInfo>
-                        <ShippingInfo
-                            country={country}
-                            state={state}
-                            city={city}
-                            address={shippingAddress}
-                            house_number={houseNumber}
-                            apartament_number={apartamentNumber}
-                            postal_code={postalCode}
-                            phone_number={phoneNumber}
-                            more_info={moreInfo}
-                            uuid={uuid}>
-                        </ShippingInfo>
-                        <UserManagement uuid={uuid} email={user.email}></UserManagement>
+                        {isShippingSetted ? (
+                            <>
+                                <EditShippingInfo
+                                    country={country}
+                                    state={state}
+                                    city={city}
+                                    address={shippingAddress}
+                                    house_number={houseNumber}
+                                    apartament_number={apartamentNumber}
+                                    postal_code={postalCode}
+                                    phone_number={phoneNumber}
+                                    more_info={moreInfo}
+                                    uuid={uuid}>
+                                </EditShippingInfo>
+                            </>
+                        ):(
+                            <>
+                                <AddShippingInfo uuid={uuid} email={user.email}></AddShippingInfo>
+                            </>
+                        )}
                     </div>
                     <div className="flex justify-center items-center text-center">
                         <span>User ID: {uuid}</span>

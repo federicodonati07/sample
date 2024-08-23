@@ -1,107 +1,104 @@
-import React, { useEffect, useState } from 'react'
-import { MdOutlineEdit } from 'react-icons/md';
-import InfoEdit from './infoEdit';
-import {Input} from '@/components/ui/input';
+import React, { useEffect, useState } from 'react';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import supabase from '@/lib/supabase/supabaseClient';
 
+const UserInfo = ({ name, surname, email, role, orders }) => {
+  const [inputNameValue, setInputNameValue] = useState(name || '');
+  const [inputSurnameValue, setInputSurnameValue] = useState(surname || '');
 
-const UserInfo = ({name, surname, email, role, orders}) => {
-    const [inputNameValue, setInputNameValue] = useState(`${name}`)
-    const [inputSurnameValue, setInputSurnameValue] = useState(`${surname}`)
+  const handleEdit = async () => {
+    if (inputNameValue !== '' || inputSurnameValue !== '') {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', email);
 
-    const handleEdit = async()=>{
-        if(inputNameValue !== '' || inputSurnameValue !== ''){
-            const {data, error} = await supabase
-                .from("profiles")
-                .select("*")
-                .eq("email", email)
+      if (error) {
+        window.location.href = '/private';
+      }
 
-            if(error){
-                window.location.href = "/private"
-            }
+      if (data?.length === 0) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .insert([{
+            name: inputNameValue,
+            surname: inputSurnameValue,
+            email: email,
+          }]);
 
-            if(data?.length == 0){
-                const {data, error} = await supabase
-                    .from("profiles")
-                    .insert([{
-                        name: inputNameValue,
-                        surname: inputSurnameValue,
-                        email: email
-                    }])
-
-                if(error){
-                    window.location.href = "/private"
-                }
-
-            }else{
-                const {data, error} = await supabase
-                    .from("profiles")
-                    .update([{
-                        name: inputNameValue,
-                        surname: inputSurnameValue
-                    }])
-                    .eq("email", email)
-                    .single()
-
-                if(error){
-                    window.location.href = "/private"
-                }
-            }
+        if (error) {
+          window.location.href = '/private';
         }
+      } else {
+        const { data, error } = await supabase
+          .from('profiles')
+          .update({
+            name: inputNameValue,
+            surname: inputSurnameValue,
+          })
+          .eq('email', email)
+          .single();
+
+        if (error) {
+          window.location.href = '/private';
+        }
+      }
     }
+  };
 
-    useEffect(()=>{
-        setInputNameValue(name)
-        setInputSurnameValue(surname)
-    }, [name, surname])
+  useEffect(() => {
+    setInputNameValue(name || '');
+    setInputSurnameValue(surname || '');
+  }, [name, surname]);
 
-    return (
-        <>
-            <div className="border-slate-50 border-b">
-                <div className="flex flex-col justify-center items-center text-center">
-                    <div className="p-2">
-                        <span className="font-black">User Information</span>
-                    </div>
-                    <div className="overflow-auto flex flex-col justify-start items-start text-start p-2 ">
-                        <div className='grid grid-cols-2 mb-2 p-2'>
-                            <span className='text-xl mx-2'>Name:</span>
-                            <Input 
-                                type="text"
-                                value={inputNameValue}
-                                onChange={(e) => setInputNameValue(e.target.value)}
-                                placeholder="Insert a value"
-                                className='font-black'>    
-                            </Input>
-                        </div>
-                        <div className='grid grid-cols-2 mb-2 border-slate-50 border-b p-2'>
-                            <span className='text-xl mx-2'>Surname:</span>
-                            <Input
-                                type="text"
-                                value={inputSurnameValue}
-                                onChange={(e)=>setInputSurnameValue(e.target.value)}
-                                placeholder='Insert a value'
-                                className='font-black'>    
-                            </Input>
-                        </div>
-                        <div className='mx-2'>
-                            <span className='text-xl'>Email: <span className="font-black text-md opacity-50">{email}</span></span>
-                            
-                        </div>
-                        <div className='mx-2'>
-                            <span className='text-xl'>Role: <span className={`font-black text-md opacity-50 ${role === "admin" ? 'text-cyan-600' : role === "veteran" ? 'text-violet-600' : role === "member" ? 'text-green-600' : role === "banned" ? "text-red-600" : ""}`}>{role}</span></span>
-                        </div>
-                        <div className='mx-2'>
-                            <span className='text-xl'>Orders: <span className="font-black text-md opacity-50">{orders}</span></span>
-                        </div>
-                    </div>
-                    <div className='flex flex-col justify-center items-center'>
-                        <Button onClick={handleEdit} className='bg-slate-50 text-slate-950 m-2'>Edit User Info</Button>
-                    </div>
-                </div>
-            </div>
-        </>
-    )
-}
+  return (
+    <div className="lg:border lg:border-gray-300 lg:rounded-lg p-4 lg:max-w-3xl lg:mx-auto mt-2 shadow-lg">
+      <div className="text-center mb-4">
+        <span className="text-2xl font-bold">User Information</span>
+      </div>
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="flex flex-col">
+            <label className="text-lg font-semibold mb-1">Name:</label>
+            <Input
+              type="text"
+              value={inputNameValue}
+              onChange={(e) => setInputNameValue(e.target.value)}
+              placeholder="Insert a value"
+              className="border border-gray-300 rounded-lg p-2"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="text-lg font-semibold mb-1">Surname:</label>
+            <Input
+              type="text"
+              value={inputSurnameValue}
+              onChange={(e) => setInputSurnameValue(e.target.value)}
+              placeholder="Insert a value"
+              className="p-2"
+            />
+          </div>
+        </div>
+        <div className="flex justify-center mb-4">
+          <Button onClick={handleEdit} className="bg-slate-50 text-slate-950">
+            Edit User Info
+          </Button>
+        </div>
+        <div className="space-y-2">
+          <div>
+            <span className="text-lg font-semibold">Email:</span> <span className="font-semibold text-gray-500">{email}</span>
+          </div>
+          <div>
+            <span className="text-lg font-semibold">Role:</span> <span className={`font-semibold text-gray-500 ${role === 'admin' ? 'text-blue-600' : role === 'veteran' ? 'text-violet-600' : role === 'member' ? 'text-green-600' : role === 'banned' ? 'text-red-600' : ''}`}>{role}</span>
+          </div>
+          <div>
+            <span className="text-lg font-semibold">Orders:</span> <span className="font-semibold text-gray-500">{orders}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-export default UserInfo
+export default UserInfo;

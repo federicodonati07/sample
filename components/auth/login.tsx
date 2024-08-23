@@ -52,15 +52,22 @@ const Login = () => {
   }
 
   const handleLogin = async()=>{
-    if(checkEmail &&checkPassword){
+    if(checkEmail && checkPassword){
       const {data, error} = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       })
 
+      
+
       if(error){
-        setError("error during login conncetion")
-        setIsError(true)
+        if(data.user === null){
+          setError("user not found or incorrect password, signup")
+          setIsError(true)
+        }else{
+          console.log("here 1")
+          setError("error during login conncetion")
+        }
       }else{
         setError("")
         setIsError(false)
