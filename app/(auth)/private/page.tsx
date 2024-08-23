@@ -170,7 +170,7 @@ const Page = ()=>{
                             postal_code={postalCode}
                             phone_number={phoneNumber}
                             more_info={moreInfo}
-                            email={email}>
+                            uuid={uuid}>
                         </ShippingInfo>
                         <UserManagement uuid={uuid} email={user.email}></UserManagement>
                     </div>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { MdOutlineEdit } from 'react-icons/md';
 import { FaShippingFast } from 'react-icons/fa';
 import {
   AlertDialog,
@@ -185,6 +184,8 @@ const UserManagement = ({ uuid, email }) => {
             if (error) {
                 setError('Error updating shipping information');
                 setIsError(true);
+            }else{
+              router.refresh()
             }
         }
       } catch (err) {
@@ -199,11 +200,7 @@ const UserManagement = ({ uuid, email }) => {
     <div className="p-4">
       <div className="flex flex-col items-center text-center">
         <h2 className="font-black mb-2">User Management</h2>
-        <div className="overflow-auto grid grid-rows-2 md:grid-cols-2 mt-5 gap-2">
-          <Button className="bg-yellow-600">
-            <MdOutlineEdit className="text-xl font-black" />
-            Edit Profile
-          </Button>
+        <div className="overflow-auto justify-center items-center grid grid-rows-2 md:grid-cols-2 mt-5 gap-2">
           <AlertDialog>
             <AlertDialogTrigger>
               {isShipping ? (
@@ -212,7 +209,6 @@ const UserManagement = ({ uuid, email }) => {
                   Add shipping information
                 </Button>
               ) : ""}
-              
             </AlertDialogTrigger>
             <AlertDialogContent className="bg-slate-950">
               <AlertDialogHeader>
