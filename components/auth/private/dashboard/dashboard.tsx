@@ -7,12 +7,26 @@ const Dashboard = ({user, email}) => {
     const [name, setName] = useState("---")
     const [surname, setSurname] = useState("---")
     const [number, setNumber] = useState("---")
+    const [orders, setOrders] = useState(0)
 
     useEffect(()=>{
         const getProfileCount = async ()=>{
             const {data, error} = await supabaseAdmin.auth.admin.listUsers()
 
             setNumber(data.total)
+        }
+
+        const getOrdersCount = async ()=>{
+            const {data, error} = await supabase
+                .from("orders_counter")
+                .select("*")
+                .single()
+
+            if(data){
+                setOrders(data.counter)
+            }else{
+                setOrders(0)
+            }
         }
 
         const fetchProfileInfo = async ()=>{
@@ -29,6 +43,7 @@ const Dashboard = ({user, email}) => {
         }
         fetchProfileInfo()
         getProfileCount()
+        getOrdersCount()
 
     }, [email, user])
 
@@ -39,13 +54,14 @@ const Dashboard = ({user, email}) => {
                     <span className='text-2xl font-black m-2'>DashBoard</span>
                     <span className='text-sm m-2'>Hi {name} {surname}</span>
                 </div>
-                <div className='grid grid-cols-2 gap-10'>
-                    <div className='transition-all ease-in-out duration-200 mt-20 p-4 flex-flex-col justify-center items-center cursor-pointer border border-red-600 bg-red-600 text-slate-50 shadow-lg shadow-red-600 hover:text-slate-50 hover:bg-transparent'>
-                        <span></span>
+                <div className='grid grid-rows-2 justify-center items-center text-center lg:grid lg:grid-cols-2 gap-10'>
+                    <div className='transition-all ease-in-out duration-200 mt-20 p-4 flex-flex-col justify-center items-center text-center cursor-pointer border border-red-600 bg-red-600 text-slate-50 shadow-lg shadow-red-600 hover:text-slate-50 hover:bg-transparent'>
+                        <Counter n={orders}></Counter>
+                        <span className='font-black text-sm'>Total Orders</span>
                     </div>
                     <div className='transition-all ease-in-out duration-200 mt-20 p-4 flex flex-col justify-center items-center cursor-pointer border border-slate-50 bg-slate-50 text-slate-950 shadow-lg shadow-slate-50 hover:text-slate-50 hover:bg-transparent'>
-                        <Counter toN={number}></Counter>
-                        <span className='font-black'>Users</span>
+                        <Counter n={number}></Counter>
+                        <span className='font-black text-sm'>Total Users</span>
                     </div>
                 </div>
                 
