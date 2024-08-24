@@ -90,7 +90,7 @@ const UserInfo = ({ name, surname, email, role, orders }) => {
             <span className="text-lg font-semibold">Email:</span> <span className="font-semibold text-gray-500">{email}</span>
           </div>
           <div>
-            <span className="text-lg font-semibold">Role:</span> <span className={`font-semibold text-gray-500 ${role === 'admin' ? 'text-blue-600' : role === 'veteran' ? 'text-violet-600' : role === 'member' ? 'text-green-600' : role === 'banned' ? 'text-red-600' : ''}`}>{role}</span>
+            <span className="text-lg font-semibold">Role:</span> <span className={`font-semibold text-gray-500 ${role === 'admin' ? 'text-teal-600' : role === 'veteran' ? 'text-violet-600' : role === 'member' ? 'text-green-600' : role === 'banned' ? 'text-red-600' : ''}`}>{role}</span>
           </div>
           <div>
             <span className="text-lg font-semibold">Orders:</span> <span className="font-semibold text-gray-500">{orders}</span>
