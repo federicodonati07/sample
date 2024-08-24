@@ -13,6 +13,7 @@ import { CiUser } from "react-icons/ci";
 import UserInfo from "@/components/auth/private/userInfo"
 import EditShippingInfo from "@/components/auth/private/editShippingInfo"
 import AddShippingInfo from "@/components/auth/private/addShippingInfo"
+import { MdOutlineDashboard } from "react-icons/md";
 
 const Page = ()=>{
     const [user, setUser] = useState<User | null>(null)
@@ -169,6 +170,18 @@ const Page = ()=>{
                 
                 <div className="border border-slate-50 rounded-lg w-full m-2">
                     <div className="flex flex-col gap-2">
+                        {role === "admin" ? (
+                            <>
+                                <div className="m-2">
+                                    <Link href="/private/dashboard">
+                                        <Button className="bg-slate-50 text-slate-950">
+                                        <MdOutlineDashboard className="text-black"/>
+                                            Dashboard
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </>
+                        ) : ""}
                         <UserInfo
                             name={name}
                             surname={surname}

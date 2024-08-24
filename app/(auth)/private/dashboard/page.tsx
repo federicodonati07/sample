@@ -6,6 +6,7 @@ import { User } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import Dashboard from '@/components/auth/private/dashboard/dashboard'
+import { FcPrevious } from "react-icons/fc";
 
 const Page = () => {
     const [user, setUser] = useState<User | null>(null)
@@ -53,6 +54,12 @@ const Page = () => {
             {isValidRole ? (
                 <>
                     <div className='flex flex-col justify-center items-center'>
+                        <Link href="/private">
+                            <Button className='absolute top-0 left-0 m-2 bg-slate-50 text-slate-950 font-black'>
+                                <FcPrevious className='text-black'/>Previous
+                            </Button>
+                        </Link>
+                        
                         <Dashboard user={user} email={email}></Dashboard>
                     </div>
                 </>

@@ -10,8 +10,12 @@ const Counter = ({toN}) => {
     })
 
     return (
-    <>
-        <animated.div>{number.to((toN)=>toN.toFixed(0))}</animated.div>
+    <>  
+        <div className='flex flex-row'>
+            <span className='text-4xl font-black'>+</span>
+            <animated.div className={`text-4xl font-black`}>{number.to((toN)=>toN.toFixed(0))}</animated.div> 
+        </div>
+       
     </>
   )
 }

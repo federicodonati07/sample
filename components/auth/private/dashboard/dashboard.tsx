@@ -35,13 +35,20 @@ const Dashboard = ({user, email}) => {
     return (
         <>
             <div className='flex flex-col justify-center items-center m-2'>
-                <div>
+                <div className='flex flex-col lg:block '>
                     <span className='text-2xl font-black m-2'>DashBoard</span>
                     <span className='text-sm m-2'>Hi {name} {surname}</span>
                 </div>
-                <div>
-                    <Counter toN={number}></Counter>
+                <div className='grid grid-cols-2 gap-10'>
+                    <div className='transition-all ease-in-out duration-200 mt-20 p-4 flex-flex-col justify-center items-center cursor-pointer border border-red-600 bg-red-600 text-slate-50 shadow-lg shadow-red-600 hover:text-slate-50 hover:bg-transparent'>
+                        <span></span>
+                    </div>
+                    <div className='transition-all ease-in-out duration-200 mt-20 p-4 flex flex-col justify-center items-center cursor-pointer border border-slate-50 bg-slate-50 text-slate-950 shadow-lg shadow-slate-50 hover:text-slate-50 hover:bg-transparent'>
+                        <Counter toN={number}></Counter>
+                        <span className='font-black'>Users</span>
+                    </div>
                 </div>
+                
             </div>
         </>
     )
