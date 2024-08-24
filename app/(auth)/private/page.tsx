@@ -52,6 +52,7 @@ const Page = ()=>{
             .eq("email", email)
             .single()
 
+        console.log("valori del select: userinfo: ", data)
         if (error) {
             console.error("Error fetching user info:", error);
         } else {
