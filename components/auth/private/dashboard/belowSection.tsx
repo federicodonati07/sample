@@ -17,7 +17,6 @@ import supabase from '@/lib/supabase/supabaseClient'
 import supabaseAdmin from '@/lib/supabase/supabaseAdmin'
 import { IoPersonRemoveOutline } from "react-icons/io5";
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AllUsersTable from './allUsersTable'
@@ -26,46 +25,53 @@ const BelowSection = ({ currentEmail }) => {
     const [areData, setAreData] = useState(false)
     const [adminUsers, setAdminUsers] = useState([]) // Stato per memorizzare gli utenti admin
     const [uuidAuth, setUuidAuth] = useState({})
-
-    const router = useRouter()
+    const [activeAccordion, setActiveAccordion] = useState('')
 
     useEffect(() => {
-        const getAdminUsers = async () => {
-            const { data, error } = await supabase
-                .from("profiles")
-                .select("*")
-                .eq("role", "admin")
+        fetchAdminUsers()
+    }, [])
 
-            if (error) {
-                console.log(error)
+    const fetchAdminUsers = async () => {
+        const { data, error } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("role", "admin")
+
+        if (error) {
+            console.log(error)
+        } else {
+            if (!data || data.length === 0) {
+                setAreData(false)
             } else {
-                if (!data || data.length === 0) {
-                    setAreData(false)
-                } else {
-                    setAreData(true)
-                    setAdminUsers(data) // Memorizza i dati degli utenti admin
+                setAreData(true)
+                setAdminUsers(data) // Memorizza i dati degli utenti admin
 
-                    const fetchAllAuthUserUuids = async () => {
-                        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers()
-                        if (authError) {
-                            console.error(authError)
-                        } else {
-                            const uuidMap = {}
-                            data.forEach((user) => {
-                                const authUser = authData.users.find(authUser => authUser.email === user.email)
-                                if (authUser) {
-                                    uuidMap[user.email] = authUser.id
-                                }
-                            })
-                            setUuidAuth(uuidMap)
-                        }
+                const fetchAllAuthUserUuids = async () => {
+                    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers()
+                    if (authError) {
+                        console.error(authError)
+                    } else {
+                        const uuidMap = {}
+                        data.forEach((user) => {
+                            const authUser = authData.users.find(authUser => authUser.email === user.email)
+                            if (authUser) {
+                                uuidMap[user.email] = authUser.id
+                            }
+                        })
+                        setUuidAuth(uuidMap)
                     }
-                    fetchAllAuthUserUuids()
                 }
+                fetchAllAuthUserUuids()
             }
         }
-        getAdminUsers()
-    }, [])
+    }
+
+    const handleAccordionChange = (value) => {
+        setActiveAccordion(value)
+        if (value === "item-1") {
+            fetchAdminUsers() // Ricarica gli utenti admin quando l'accordion viene espanso
+        }
+    }
 
     const handleRemoveAdmin = async (email) => {
         const { data, error } = await supabase
@@ -83,7 +89,13 @@ const BelowSection = ({ currentEmail }) => {
 
     return (
         <>
-            <Accordion type="single" collapsible className="w-full m-2">
+            <Accordion
+                type="single"
+                collapsible
+                className="w-full m-2"
+                value={activeAccordion}
+                onValueChange={handleAccordionChange}
+            >
                 <AccordionItem value="item-1">
                     <AccordionTrigger>Admin</AccordionTrigger>
                     <AccordionContent>

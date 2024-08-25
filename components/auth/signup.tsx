@@ -141,9 +141,7 @@ const Signup = () => {
     const {data, error} = await supabase.auth.signInWithOAuth({
       provider: "google",
     })
-
     
-
     if(error){
       setError("error during login conncetion")
       setIsError(true)

@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from "next/navigation"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import supabase from "@/lib/supabase/supabaseClient"
 import { User } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
@@ -15,122 +15,138 @@ import EditShippingInfo from "@/components/auth/private/editShippingInfo"
 import AddShippingInfo from "@/components/auth/private/addShippingInfo"
 import { MdOutlineDashboard } from "react-icons/md";
 
-const Page = ()=>{
-    const [user, setUser] = useState<User | null>(null)
-    const [name, setName] = useState('---')
-    const [surname, setSurname] = useState('---')
-    const [email, setEmail] = useState('---')
-    const [role, setRole] = useState('---')
-    const [orders, setOrders] = useState('---')
-    const [uuid, setUuid] = useState('')
-
-    const [country, setCountry] = useState('---')
-    const [state, setState] = useState('---')
-    const [city, setCity] = useState('---')
-    const [shippingAddress, setShippingAddress] = useState('---')
-    const [houseNumber, setHouseNumber] = useState('---')
-    const [apartamentNumber, setApartamentNumber] = useState('---')
-    const [postalCode, setPostalCode] = useState('---')
-    const [phoneNumber, setPhoneNumber] = useState('---')
-    const [moreInfo, setMoreInfo] = useState('---')
-
-    const [isShippingSetted, setIsShippingSetted] = useState(false)
-    const router = useRouter()
-
-    //  FUNCTION OF CODE BELOW  //
-    const [isVisible, setIsVisible] = useState(false)
+const Page = () => {
+    const [user, setUser] = useState<User | null>(null);
+    const [profile, setProfile] = useState({
+        name: '---',
+        surname: '---',
+        email: '---',
+        role: '---',
+        orders: '---'
+    });
+    const [shipping, setShipping] = useState({
+        country: '---',
+        state: '---',
+        city: '---',
+        address: '---',
+        house_number: '---',
+        apartament_number: '---',
+        postal_code: '---',
+        phone_number: '---',
+        more_info: '---'
+    });
+    const [uuid, setUuid] = useState('');
+    const [isShippingSetted, setIsShippingSetted] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+    const router = useRouter();
 
     const toggleVisibilityMenu = () => {
-        setIsVisible(!isVisible);
+        setIsVisible(prev => !prev);
     };
 
-
-    //  SESSION LOGIC  //
-    const getUserInfo = async(email)=>{
-        const {data, error} = await supabase
+    const fetchUserInfo = useCallback(async (email) => {
+        const { data, error } = await supabase
             .from("profiles")
             .select("*")
             .eq("email", email)
-            .single()
+            .single();
 
-        console.log("valori del select: userinfo: ", data)
         if (error) {
             console.error("Error fetching user info:", error);
+        } else if (data) {
+            setProfile(prev => ({
+                ...prev,
+                name: data.name || '---',
+                surname: data.surname || '---',
+                role: data.role || '---',
+                orders: data.orders
+            }));
+        }
+    }, []);
+
+    const checkAndInsertProfileData = useCallback(async (email) => {
+        const { data, error } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("email", email);
+
+        if (error) {
+            console.error("Error checking profile data:", error.message);
+            return;
+        }
+
+        if (data.length === 0) {
+            const { error: insertError } = await supabase
+                .from("profiles")
+                .insert([{
+                    name: "---",
+                    surname: "---",
+                    email,
+                    role: "member",
+                    orders: 0
+                }]);
+
+            if (insertError) {
+                console.error("Error inserting profile data:", insertError.message);
+            }
+        }
+    }, []);
+
+    const fetchShippingInfo = useCallback(async (uuid) => {
+        const { data, error } = await supabase
+            .from("shipping_info")
+            .select("*")
+            .eq("profile_uuid", uuid)
+            .single();
+
+        if (data) {
+            setShipping({
+                country: data.country || '---',
+                state: data.state || '---',
+                city: data.city || '---',
+                address: data.address || '---',
+                house_number: data.house_number || '---',
+                apartament_number: data.apartament_number || '---',
+                postal_code: data.postal_code || '---',
+                phone_number: data.phone_number || '---',
+                more_info: data.more_info || '---'
+            });
+            setIsShippingSetted(true);
         } else {
-            setName(data.name)
-            setSurname(data.surname)
-            setRole(data.role)
-            setOrders(data.orders)
+            setIsShippingSetted(false);
         }
-    }
+    }, []);
 
-    useEffect(()=>{
-        const fetchShippingInfo = async(uuid)=>{
-            const {data, error} = await supabase
-                .from("shipping_info")
-                .select("*")
-                .eq("profile_uuid", uuid)
+    useEffect(() => {
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
 
-            console.log(data, uuid)
-            if(data?.length == 0){
-                setIsShippingSetted(false)
-            }else{
-                setIsShippingSetted(true)
+            if (session) {
+                setUser(session.user);
+                setUuid(session.user.id);
+                const userEmail = session.user.email || '---';
+                setProfile(prev => ({ ...prev, email: userEmail }));
+                await fetchUserInfo(userEmail);
+                await checkAndInsertProfileData(userEmail);
+                await fetchShippingInfo(session.user.id);
+            } else {
+                router.push("/auth");
             }
-        }
+        };
 
-        const getSession = async()=>{
-            const {data:{session}} = await supabase.auth.getSession()
-            
-            if(session){
-                setUser(session.user)
-                setUuid(session.user.id)
-                setEmail(session.user.email!)
-                getUserInfo(session.user.email)
-                fetchShippingInfo(session.user.id)
-            }else{
-                router.push("/auth")
-            }
-        }
+        getSession();
+    }, [fetchUserInfo, checkAndInsertProfileData, fetchShippingInfo, router]);
 
-        getSession()
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push("/auth");
+    };
 
-    }, [router])
+    if (!user) return null;
 
-    useEffect(()=>{
-        const handleFetchShipping = async()=>{
-            const {data, error} = await supabase
-                .from("shipping_info")
-                .select("*")
-                .eq("profile_uuid", uuid)
-                .single()
-
-            if(data){
-                setCountry(data.country)
-                setState(data.state)
-                setCity(data.city)
-                setShippingAddress(data.address)
-                setHouseNumber(data.house_number)
-                setApartamentNumber(data.apartament_number)
-                setPostalCode(data.postal_code)
-                setPhoneNumber(data.phone_number)
-                setMoreInfo(data.more_info)
-            }
-        }
-
-        handleFetchShipping()
-    }, [uuid])
-
-
-    const handleLogout = async()=>{
-        await supabase.auth.signOut()
-        router.push("/auth")
-    }
-
-    if(!user) return null;
-    return(
+    return (
         <>
-            <div className='flex flex-row justify-center items-center  text-white relative'>
+            <div className='flex flex-row justify-center items-center text-white relative'>
                 <span className='m-2 text-2xl tracking-widest'>PRIVATE</span>
                 <div className="absolute top-0 right-0 m-4">
                     <CiMenuBurger
@@ -139,7 +155,7 @@ const Page = ()=>{
                     />
                 </div>
             </div>
-            <div 
+            <div
                 className={`overflow-hidden z-50 text-white border border-slate-50 rounded-lg absolute top-0 left-0 w-full transition-all duration-500 ease-in-out ${isVisible ? 'max-h-screen' : 'max-h-0'}`}>
                 <div className="flex flex-col items-center p-6 m-6 space-y-4 font-black">
                     <IoCloseOutline
@@ -148,67 +164,60 @@ const Page = ()=>{
                     />
                     <Link href="/">
                         <span className="hover:underline flex flex-row">
-                            <GoHome className='mr-2 text-2xl'/>Home
+                            <GoHome className='mr-2 text-2xl' />Home
                         </span>
                     </Link>
                     <Link href="/private">
                         <span className="hover:underline flex flex-row">
-                            <CiUser className='mr-2 text-2xl'/>Profile
+                            <CiUser className='mr-2 text-2xl' />Profile
                         </span>
                     </Link>
                     <Link href="/collection">
                         <span className="hover:underline flex flex-row">
-                            <AiOutlineProduct className='mr-2 text-2xl'/>Collection
+                            <AiOutlineProduct className='mr-2 text-2xl' />Collection
                         </span>
                     </Link>
                 </div>
             </div>
 
             <div
-            className={`text-white flex flex-row m-2 p-2 mt-10 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
+                className={`text-white flex flex-row m-2 p-2 mt-10 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
                 <Button onClick={handleLogout} className="z-51 absolute top-0 left-0 m-2 bg-slate-50 text-slate-950 font-black">Logout</Button>
-                
+
                 <div className="border border-slate-50 rounded-lg w-full m-2">
                     <div className="flex flex-col gap-2">
-                        {role === "admin" ? (
-                            <>
-                                <div className="m-2">
-                                    <Link href="/private/dashboard">
-                                        <Button className="bg-slate-50 text-slate-950">
-                                        <MdOutlineDashboard className="text-black"/>
-                                            Dashboard
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </>
-                        ) : ""}
+                        {profile.role === "admin" && (
+                            <div className="m-2">
+                                <Link href="/private/dashboard">
+                                    <Button className="bg-slate-50 text-slate-950">
+                                        <MdOutlineDashboard className="text-black" />
+                                        Dashboard
+                                    </Button>
+                                </Link>
+                            </div>
+                        )}
                         <UserInfo
-                            name={name}
-                            surname={surname}
-                            email={email}
-                            role={role}
-                            orders={orders}>
-                            
-                        </UserInfo>
+                            name={profile.name}
+                            surname={profile.surname}
+                            email={profile.email}
+                            role={profile.role}
+                            orders={profile.orders}
+                        />
                         {isShippingSetted ? (
-                            <>
-                                <EditShippingInfo
-                                    country={country}
-                                    state={state}
-                                    city={city}
-                                    address={shippingAddress}
-                                    house_number={houseNumber}
-                                    apartament_number={apartamentNumber}
-                                    postal_code={postalCode}
-                                    phone_number={phoneNumber}
-                                    more_info={moreInfo}
-                                    uuid={uuid}>
-                                </EditShippingInfo>
-                            </>
-                        ):(
-                            <>
-                                <AddShippingInfo uuid={uuid} email={user.email}></AddShippingInfo>
-                            </>
+                            <EditShippingInfo
+                                country={shipping.country}
+                                state={shipping.state}
+                                city={shipping.city}
+                                address={shipping.address}
+                                house_number={shipping.house_number}
+                                apartament_number={shipping.apartament_number}
+                                postal_code={shipping.postal_code}
+                                phone_number={shipping.phone_number}
+                                more_info={shipping.more_info}
+                                uuid={uuid}
+                            />
+                        ) : (
+                            <AddShippingInfo uuid={uuid} email={user.email} />
                         )}
                     </div>
                     <div className="flex justify-center items-center text-center">
@@ -220,6 +229,4 @@ const Page = ()=>{
     )
 }
 
-export default Page
-
-
+export default Page;

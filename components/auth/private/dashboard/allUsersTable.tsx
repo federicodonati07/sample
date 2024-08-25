@@ -31,6 +31,7 @@ const AllUsersTable = ({ currentEmail }) => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [profilesInfo, setProfilesInfo] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [roleFilter, setRoleFilter] = useState('all');
 
   useEffect(() => {
     const getAllUsers = async () => {
@@ -67,8 +68,10 @@ const AllUsersTable = ({ currentEmail }) => {
     ));
   };
 
-  const handleSortByDate = () => {
-    setFilteredUsers([...filteredUsers].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+  const handleSortByDate = (order) => {
+    setFilteredUsers([...filteredUsers].sort((a, b) => order === 'desc' 
+      ? new Date(b.created_at) - new Date(a.created_at) 
+      : new Date(a.created_at) - new Date(b.created_at)));
   };
 
   const handleRoleChange = async (email, newRole) => {
@@ -117,6 +120,15 @@ const AllUsersTable = ({ currentEmail }) => {
     }
   };
 
+  const filterByRole = (role) => {
+    setRoleFilter(role);
+    if (role === 'all') {
+      setFilteredUsers(allUsers);
+    } else {
+      setFilteredUsers(allUsers.filter(user => getProfileInfo(user.email, 'role') === role));
+    }
+  };
+
   return (
     <>
       <div className='flex flex-row space-x-2'>
@@ -126,9 +138,31 @@ const AllUsersTable = ({ currentEmail }) => {
           placeholder='Search by name, surname, email, or UUID'
           className='w-52'
         />
-        <Button onClick={handleSortByDate} className='bg-slate-50 text-slate-950'>
-          <FaCalendarAlt className='text-lg font-black' />
+        <Button onClick={() => handleSortByDate('desc')} className='bg-slate-50 text-slate-950'>
+          Sort by Recent <FaCalendarAlt className='text-lg font-black' />
         </Button>
+        <Button onClick={() => handleSortByDate('asc')} className='bg-slate-50 text-slate-950'>
+          Sort by Oldest <FaCalendarAlt className='text-lg font-black' />
+        </Button>
+        <Select
+          value={roleFilter}
+          onValueChange={filterByRole}
+          className='w-48'
+        >
+          <SelectTrigger className='w-52'>
+            <SelectValue placeholder="Filter by role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Roles</SelectLabel>
+              <SelectItem value="all" className='cursor-pointer'>All</SelectItem>
+              <SelectItem value="admin" className={`cursor-pointer ${getRoleColorClass('admin')}`}>Admin</SelectItem>
+              <SelectItem value="member" className={`cursor-pointer ${getRoleColorClass('member')}`}>Member</SelectItem>
+              <SelectItem value="veteran" className={`cursor-pointer ${getRoleColorClass('veteran')}`}>Veteran</SelectItem>
+              <SelectItem value="banned" className={`cursor-pointer ${getRoleColorClass('banned')}`}>Banned</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
         {isLoading && (
           <div>
             <ThreeDots
@@ -137,13 +171,14 @@ const AllUsersTable = ({ currentEmail }) => {
               width="30"
               radius="5"
               color='#ffffff'
-              ariaLabel="three-dots-loading"
+              ariaLabel
+              ="three-dots-loading"
             />
           </div>
         )}
       </div>
       <div className="overflow-x-auto">
-        <Table className="w-full">
+        <Table className="overflow-auto w-full">
           <TableHeader>
             <TableRow>
               <TableHead>Name Surname</TableHead>
@@ -189,7 +224,7 @@ const AllUsersTable = ({ currentEmail }) => {
                 <TableCell>{format(new Date(user.created_at), 'dd/MM/yyyy')}</TableCell>
                 <TableCell>{user.id}</TableCell>
                 <TableCell>
-                    {user.email !== currentEmail ? (
+                    {user.email !== currentEmail && getProfileInfo(user.email, 'role') !== 'admin' ? (
                         <Button onClick={() => handleUnsubscribe(user.id, user.email)} className='bg-red-600 text-slate-50 hover:bg-transparent hover:text-red-600'>
                             Unsubscribe User
                         </Button>

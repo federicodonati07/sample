@@ -55,7 +55,7 @@ const Dashboard = ({user, email}) => {
                     <span className='text-2xl font-black m-2'>DashBoard</span>
                     <span className='text-sm m-2'>Hi {name} {surname}</span>
                 </div>
-                <div className='grid grid-rows-4 justify-center items-center text-center lg:grid lg:grid-cols-3 lg:gap-10'>
+                <div className='grid grid-rows-3 justify-center items-center text-center lg:grid lg:grid-cols-3 lg:gap-10'>
                     <div className='transition-all ease-in-out duration-200 mt-20 p-4 flex flex-col justify-center items-center cursor-pointer border border-red-600 bg-red-600 text-slate-50 shadow-lg shadow-red-600 hover:text-red-600 hover:bg-transparent'>
                         <Counter n={orders}></Counter>
                         <span className='font-black text-sm'>Total Orders</span>
@@ -68,9 +68,9 @@ const Dashboard = ({user, email}) => {
                         <Counter n={50}></Counter>
                         <span className='font-black text-sm'>New Notifications</span>
                     </div>
-                    <div className='overflow-hidden'>
-                        <BelowSection currentEmail={email}></BelowSection>
-                    </div>
+                </div>
+                <div className='md:absolute  md:top-1/2'>
+                    <BelowSection currentEmail={email}></BelowSection>
                 </div>
             </div>
         </>
