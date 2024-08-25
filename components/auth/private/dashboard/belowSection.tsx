@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AllUsersTable from './allUsersTable'
 
 const BelowSection = ({ currentEmail }) => {
     const [areData, setAreData] = useState(false)
@@ -127,6 +128,12 @@ const BelowSection = ({ currentEmail }) => {
                         ) : (
                             <p>There are no admin users</p>
                         )}
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-2">
+                    <AccordionTrigger>All Users</AccordionTrigger>
+                    <AccordionContent>
+                        <AllUsersTable currentEmail={currentEmail}></AllUsersTable>
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
