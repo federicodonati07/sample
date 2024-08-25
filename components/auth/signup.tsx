@@ -12,6 +12,8 @@ import {
   AlertTitle,
 } from "@/components/ui/alert"
 import { useRouter } from 'next/navigation';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Signup = () => {
   const router = useRouter()
@@ -102,12 +104,19 @@ const Signup = () => {
         console.log(error)
         setIsError(true)
       }else{
-        const {data, error} = await supabase.from("profiles").insert([{name:name, surname:surname, email:email, role:"member", orders:0}])
+        const {data, error} = await supabase.from("profiles").insert([{
+          name:name, 
+          surname:surname, 
+          email:email, 
+          role:"member", 
+          orders:0
+        }])
         if(error){
           setError("error during signin conncetion")
           console.log(error)
           setIsError(true)
         }else{
+          toast.success("You have created an account successfully\nCheck the email inbox to verify account")
           router.push("/private")
         }
       }
@@ -237,6 +246,7 @@ const Signup = () => {
           <Button onClick={handleSignup} className='bg-slate-50 text-slate-950 mt-2 font-black'>Signup</Button>
         </div>
       </div>
+      <ToastContainer />
     </>
   );
 };
