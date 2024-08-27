@@ -1,3 +1,4 @@
+'use-client'
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -26,9 +27,18 @@ import {
 } from "@/components/ui/select";
 import supabase from '@/lib/supabase/supabaseClient';
 
+type User = {
+  id: string;
+  email: string;
+  created_at: string;
+  user_metadata?: {
+    full_name?: string;
+  };
+};
+
 const AllUsersTable = ({ currentEmail }) => {
-  const [allUsers, setAllUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [profilesInfo, setProfilesInfo] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState('all');
@@ -37,7 +47,7 @@ const AllUsersTable = ({ currentEmail }) => {
     const getAllUsers = async () => {
       const { data, error } = await supabaseAdmin.auth.admin.listUsers();
       if (data) {
-        const users = data.users;
+        const users: User[] = data.users;
         setAllUsers(users);
         setFilteredUsers(users);
 
