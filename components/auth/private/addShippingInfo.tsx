@@ -19,6 +19,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { isValidNumber, parsePhoneNumber } from 'libphonenumber-js';
 import { useRouter } from 'next/navigation';
 
+
 const AddShippingInfo = ({ uuid, email }) => {
   const [shippingAddress, setShippingAddress] = useState('');
   const [houseNumber, setHouseNumber] = useState('');

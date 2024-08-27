@@ -44,7 +44,7 @@ const Page = () => {
         setIsVisible(prev => !prev);
     };
 
-    const fetchUserInfo = useCallback(async (email) => {
+    const fetchUserInfo = useCallback(async (email:string) => {
         const { data, error } = await supabase
             .from("profiles")
             .select("*")
@@ -64,7 +64,7 @@ const Page = () => {
         }
     }, []);
 
-    const checkAndInsertProfileData = useCallback(async (email) => {
+    const checkAndInsertProfileData = useCallback(async (email:string) => {
         const { data, error } = await supabase
             .from("profiles")
             .select("*")
@@ -92,7 +92,7 @@ const Page = () => {
         }
     }, []);
 
-    const fetchShippingInfo = useCallback(async (uuid) => {
+    const fetchShippingInfo = useCallback(async (uuid:string) => {
         const { data, error } = await supabase
             .from("shipping_info")
             .select("*")

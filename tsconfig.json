@@ -1,17 +1,18 @@
 {
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
+    "allowJs": true, // Permette di includere file .js insieme a .ts e .tsx
+    "skipLibCheck": true, // Salta il controllo dei tipi per i file delle librerie, riduce i tempi di build
+    "strict": true, // Abilita il controllo rigoroso
+    "noImplicitAny": false, // Permette di usare "any" implicito, riducendo alcuni errori durante lo sviluppo
+    "noEmit": true, // Non emette file di output
+    "esModuleInterop": true, // Permette l'interoperabilità con moduli ES
+    "module": "esnext", // Usa la risoluzione dei moduli più recente
+    "moduleResolution": "bundler", // Risolve i moduli come fa un bundler (ad es. Webpack)
+    "resolveJsonModule": true, // Permette di importare moduli JSON
+    "isolatedModules": true, // Impedisce l'uso di funzioni TypeScript che richiedono la conoscenza globale del modulo
+    "jsx": "preserve", // Preserva JSX per successive trasformazioni (es. da Babel)
+    "incremental": true, // Abilita build incrementali per migliorare i tempi di compilazione
     "plugins": [
       {
         "name": "next"
