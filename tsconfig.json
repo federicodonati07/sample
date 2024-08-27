@@ -6,6 +6,7 @@
     "strict": true, // Abilita il controllo rigoroso
     "noImplicitAny": false, // Permette di usare "any" implicito, riducendo alcuni errori durante lo sviluppo
     "noEmit": true, // Non emette file di output
+    "noEmitOnError":true,
     "esModuleInterop": true, // Permette l'interoperabilità con moduli ES
     "module": "esnext", // Usa la risoluzione dei moduli più recente
     "moduleResolution": "bundler", // Risolve i moduli come fa un bundler (ad es. Webpack)
