@@ -72,7 +72,8 @@ const Page = () => {
                                 <Login></Login>
                             </div>
 
-                            <span className='text-xs'>don't have an account yet? 
+                            <span className='text-xs'>
+                                no account account yet? 
                                 <span onClick={toggleMethod} className='underline cursor-pointer'> SIGNUP</span>
                             </span>
                         </div>  
