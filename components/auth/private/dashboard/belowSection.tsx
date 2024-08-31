@@ -21,9 +21,18 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AllUsersTable from './allUsersTable'
 
+interface Data{
+    id: number;
+    name: string;
+    surname: string;
+    email: string;
+    role: string;
+    status: string;
+}
+
 const BelowSection = ({ currentEmail }) => {
     const [areData, setAreData] = useState(false)
-    const [adminUsers, setAdminUsers] = useState([]) // Stato per memorizzare gli utenti admin
+    const [adminUsers, setAdminUsers] = useState<Data[]>([]) // Stato per memorizzare gli utenti admin
     const [uuidAuth, setUuidAuth] = useState({})
     const [activeAccordion, setActiveAccordion] = useState('')
 
@@ -119,7 +128,7 @@ const BelowSection = ({ currentEmail }) => {
                                                 <TableCell>{user.email}</TableCell>
                                                 <TableCell>
                                                     <div className="overflow-auto">
-                                                        {uuidAuth[user.email] || "N/A"}
+                                                        {uuidAuth[user.email] || "---"}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>

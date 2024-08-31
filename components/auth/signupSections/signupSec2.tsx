@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Country, State, City } from 'country-state-city';
+import { Country, State, City, ICity } from 'country-state-city';
+
+interface CountryType {
+    isoCode: string;
+    name: string;
+}
+
+interface StateType {
+    isoCode: string;
+    name: string;
+}
+
+interface CityType {
+    id: string;
+    name: string;
+}
 
 const SignupSec2 = ({
     shippingAddress,
@@ -27,9 +42,9 @@ const SignupSec2 = ({
     surname,
     setSurname
 }) => {
-    const [countries, setCountries] = useState<Country[]>(Country.getAllCountries());
-    const [states, setStates] = useState<State[]>([]);
-    const [cities, setCities] = useState<City[]>([]);
+    const [countries, setCountries] = useState<CountryType[]>(Country.getAllCountries());
+    const [states, setStates] = useState<StateType[]>([]);
+    const [cities, setCities] = useState<CityType[]>([]);
 
     useEffect(() => {
         if (selectedCountry) {
@@ -41,7 +56,13 @@ const SignupSec2 = ({
 
     useEffect(() => {
         if (selectedState) {
-            setCities(City.getCitiesOfState(selectedCountry, selectedState));
+            const cityData = City.getCitiesOfState(selectedCountry, selectedState);
+            // Mappare gli ICity in CityType
+            const cityTypes = cityData.map((city: ICity) => ({
+                id: city.name, // Se non hai un vero ID, puoi usare il nome o un altro identificatore
+                name: city.name,
+            }));
+            setCities(cityTypes);
         } else {
             setCities([]);
         }

@@ -1,4 +1,4 @@
-'use-client'
+'use client';
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -27,205 +27,247 @@ import {
 } from "@/components/ui/select";
 import supabase from '@/lib/supabase/supabaseClient';
 
-type User = {
+interface User {
   id: string;
   email: string;
   created_at: string;
-  user_metadata?: {
-    full_name?: string;
+  user_metadata: {
+    full_name: string;
   };
-};
+}
 
-const AllUsersTable = ({ currentEmail }) => {
+interface Profile {
+  email: string;
+  role: string;
+  orders: number;
+}
+
+interface AllUsersTableProps {
+  currentEmail: string;
+}
+
+const AllUsersTable: React.FC<AllUsersTableProps> = ({ currentEmail }) => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [profilesInfo, setProfilesInfo] = useState([]);
+  const [profilesInfo, setProfilesInfo] = useState<Record<string, Profile>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [roleFilter, setRoleFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
 
   useEffect(() => {
     const getAllUsers = async () => {
-      const { data, error } = await supabaseAdmin.auth.admin.listUsers();
-      if (data) {
-        const users: User[] = data.users;
+      setIsLoading(true);
+      try {
+        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.listUsers();
+        if (userError) throw userError;
+        const users: User[] = userData.users.map((user: any) => ({
+          id: user.id,
+          email: user.email,
+          created_at: user.created_at,
+          user_metadata: {
+            full_name: user.user_metadata?.full_name || 'Unknown',
+          },
+        }));
+
+        const { data: profileData, error: profileError } = await supabase.from('profiles').select('*');
+        if (profileError) throw profileError;
+
+        const profileMap: Record<string, Profile> = profileData.reduce((acc, profile) => {
+          acc[profile.email] = profile;
+          return acc;
+        }, {});
+
         setAllUsers(users);
         setFilteredUsers(users);
-
-        const { data: profileData, error: profileError } = await supabase.from("profiles").select("*");
-        if (profileError) {
-          console.error(profileError.message);
-        } else {
-          const profileMap = profileData.reduce((acc, profile) => {
-            acc[profile.email] = profile;
-            return acc;
-          }, {});
-          setProfilesInfo(profileMap);
-        }
-      } else {
-        console.error(error);
+        setProfilesInfo(profileMap);
+      } catch (error: any) {
+        console.error('Error fetching users:', error.message);
+        toast.error(`Error fetching users: ${error.message}`);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     getAllUsers();
   }, []);
 
-  const handleSearch = (search) => {
+  const handleSearch = (search: string) => {
     const lowercasedSearch = search.toLowerCase();
-    setFilteredUsers(allUsers.filter(user =>
-      user.user_metadata?.full_name?.toLowerCase().includes(lowercasedSearch) ||
+    const filtered = allUsers.filter((user) =>
+      user.user_metadata.full_name.toLowerCase().includes(lowercasedSearch) ||
       user.email.toLowerCase().includes(lowercasedSearch) ||
       user.id.toLowerCase().includes(lowercasedSearch)
-    ));
+    );
+    setFilteredUsers(filtered);
   };
 
-  const handleSortByDate = (order) => {
-    setFilteredUsers([...filteredUsers].sort((a, b) => order === 'desc' 
-      ? new Date(b.created_at) - new Date(a.created_at) 
-      : new Date(a.created_at) - new Date(b.created_at)));
+  const handleSortByDate = (order: 'asc' | 'desc') => {
+    const sortedUsers = [...filteredUsers].sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return order === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+    setFilteredUsers(sortedUsers);
   };
 
-  const handleRoleChange = async (email, newRole) => {
-    const { error } = await supabase.from('profiles').update({ role: newRole }).eq('email', email);
-    if (error) {
-      toast.error("Error updating role: " + error.message);
-    } else {
-      toast.success("Role updated successfully!");
+  const handleRoleChange = async (email: string, newRole: string) => {
+    try {
+      const { error } = await supabase.from('profiles').update({ role: newRole }).eq('email', email);
+      if (error) throw error;
+      toast.success('Role updated successfully!');
       setProfilesInfo((prevProfiles) => ({
         ...prevProfiles,
-        [email]: { ...prevProfiles[email], role: newRole }
+        [email]: { ...prevProfiles[email], role: newRole },
       }));
+    } catch (error: any) {
+      console.error('Error updating role:', error.message);
+      toast.error(`Error updating role: ${error.message}`);
     }
   };
 
-  const handleUnsubscribe = async (uuid, email) => {
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(uuid);
-    if (authError) {
-      toast.error("Error deleting user from auth: " + authError.message);
-    } else {
-      const { error: profileError } = await supabase.from("profiles").delete().eq("email", email);
-      if (profileError) {
-        toast.error("Error deleting user from profile: " + profileError.message);
-      } else {
-        toast.success(`User deleted successfully:\nprofile email: ${email}\nauth uuid: ${uuid}`);
-        setFilteredUsers(filteredUsers.filter(user => user.id !== uuid));
-        setAllUsers(allUsers.filter(user => user.id !== uuid));
+  const handleUnsubscribe = async (uuid: string, email: string) => {
+    try {
+      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(uuid);
+      if (authError) throw authError;
+
+      const { error: profileError } = await supabase.from('profiles').delete().eq('email', email);
+      if (profileError) throw profileError;
+
+      toast.success(`User ${email} unsubscribed successfully.`);
+      setAllUsers((prevUsers) => prevUsers.filter((user) => user.id !== uuid));
+      setFilteredUsers((prevUsers) => prevUsers.filter((user) => user.id !== uuid));
+      setProfilesInfo((prevProfiles) => {
+        const updatedProfiles = { ...prevProfiles };
+        delete updatedProfiles[email];
+        return updatedProfiles;
+      });
+
+      const {data, error} = await supabase
+        .from("shipping_info")
+        .delete()
+        .eq('profile_uuid', uuid)
+
+      if(error){
+        console.error('Error deleting shipping info:', error.message);
       }
+      
+    } catch (error: any) {
+      console.error('Error unsubscribing user:', error.message);
+      toast.error(`Error unsubscribing user: ${error.message}`);
     }
   };
 
-  const getProfileInfo = (email, key) => profilesInfo[email]?.[key] || '';
-
-  const getRoleColorClass = (role) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-teal-600 text-slate-50';
-      case 'member':
-        return 'bg-green-600 text-slate-50';
-      case 'veteran':
-        return 'bg-violet-600 text-slate-50';
-      case 'banned':
-        return 'bg-red-600 text-red-50';
-      default:
-        return '';
-    }
+  const getProfileInfo = (email: string, key: keyof Profile): string | number => {
+    return profilesInfo[email]?.[key] ?? (key === 'orders' ? 0 : 'Not Assigned');
   };
 
-  const filterByRole = (role) => {
+  const getRoleColorClass = (role: string): string => {
+    const roleClasses: Record<string, string> = {
+      admin: 'bg-teal-600 text-slate-50',
+      member: 'bg-green-600 text-slate-50',
+      veteran: 'bg-violet-600 text-slate-50',
+      banned: 'bg-red-600 text-slate-50',
+    };
+    return roleClasses[role] || 'bg-gray-600 text-slate-50';
+  };
+
+  const filterByRole = (role: string) => {
     setRoleFilter(role);
     if (role === 'all') {
       setFilteredUsers(allUsers);
     } else {
-      setFilteredUsers(allUsers.filter(user => getProfileInfo(user.email, 'role') === role));
+      const filtered = allUsers.filter((user) => getProfileInfo(user.email, 'role') === role);
+      setFilteredUsers(filtered);
     }
   };
 
   return (
     <>
-      <div className='flex flex-row space-x-2'>
+      <div className='flex flex-wrap items-center gap-2 mb-4'>
         <Input
           type="text"
           onChange={(e) => handleSearch(e.target.value)}
-          placeholder='Search by name, surname, email, or UUID'
-          className='w-52'
+          placeholder='Search by name, email, or UUID'
+          className='w-full md:w-52'
         />
-        <Button onClick={() => handleSortByDate('desc')} className='bg-slate-50 text-slate-950'>
-          Sort by Recent <FaCalendarAlt className='text-lg font-black' />
-        </Button>
-        <Button onClick={() => handleSortByDate('asc')} className='bg-slate-50 text-slate-950'>
-          Sort by Oldest <FaCalendarAlt className='text-lg font-black' />
-        </Button>
-        <Select
-          value={roleFilter}
-          onValueChange={filterByRole}
-          className='w-48'
+        <Button
+          onClick={() => handleSortByDate('desc')}
+          className='flex items-center gap-2 bg-slate-50 text-slate-900 hover:bg-slate-200'
         >
-          <SelectTrigger className='w-52'>
+          Sort by Recent <FaCalendarAlt />
+        </Button>
+        <Button
+          onClick={() => handleSortByDate('asc')}
+          className='flex items-center gap-2 bg-slate-50 text-slate-900 hover:bg-slate-200'
+        >
+          Sort by Oldest <FaCalendarAlt />
+        </Button>
+        <Select value={roleFilter} onValueChange={filterByRole}>
+          <SelectTrigger className='w-full md:w-52'>
             <SelectValue placeholder="Filter by role" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Roles</SelectLabel>
-              <SelectItem value="all" className='cursor-pointer'>All</SelectItem>
-              <SelectItem value="admin" className={`cursor-pointer ${getRoleColorClass('admin')}`}>Admin</SelectItem>
-              <SelectItem value="member" className={`cursor-pointer ${getRoleColorClass('member')}`}>Member</SelectItem>
-              <SelectItem value="veteran" className={`cursor-pointer ${getRoleColorClass('veteran')}`}>Veteran</SelectItem>
-              <SelectItem value="banned" className={`cursor-pointer ${getRoleColorClass('banned')}`}>Banned</SelectItem>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="member">Member</SelectItem>
+              <SelectItem value="veteran">Veteran</SelectItem>
+              <SelectItem value="banned">Banned</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
         {isLoading && (
-          <div>
+          <div className='flex justify-center items-center'>
             <ThreeDots
               visible={true}
               height="30"
               width="30"
               radius="5"
-              color='#ffffff'
-              ariaLabel
-              ="three-dots-loading"
+              color='#000'
+              ariaLabel="three-dots-loading"
             />
           </div>
         )}
       </div>
+
       <div className="overflow-x-auto">
-        <Table className="overflow-auto w-full">
+        <Table className="min-w-full">
           <TableHeader>
             <TableRow>
-              <TableHead>Name Surname</TableHead>
+              <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Orders</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Uuid - auth</TableHead>
+              <TableHead>Date Joined</TableHead>
+              <TableHead>UUID</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className='font-black'>
+          <TableBody>
             {filteredUsers.map((user) => (
               <TableRow key={user.id}>
-                <TableCell>{user.user_metadata?.full_name}</TableCell>
+                <TableCell>{user.user_metadata.full_name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
                   {user.email !== currentEmail ? (
                     <Select
-                      value={getProfileInfo(user.email, 'role')}
+                      value={getProfileInfo(user.email, 'role') as string}
                       onValueChange={(newRole) => handleRoleChange(user.email, newRole)}
                     >
-                      <SelectTrigger className={`w-[180px] ${getRoleColorClass(getProfileInfo(user.email, 'role'))}`}>
-                        <SelectValue placeholder="Select role" />
+                      <SelectTrigger className={`w-full ${getRoleColorClass(getProfileInfo(user.email, 'role') as string)}`}>
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Roles</SelectLabel>
-                          <SelectItem value="admin" className={`cursor-pointer text-slate-50 ${getRoleColorClass('admin')}`}>Admin</SelectItem>
-                          <SelectItem value="member" className={`cursor-pointer text-slate-50 ${getRoleColorClass('member')}`}>Member</SelectItem>
-                          <SelectItem value="veteran" className={`cursor-pointer text-slate-50 ${getRoleColorClass('veteran')}`}>Veteran</SelectItem>
-                          <SelectItem value="banned" className={`cursor-pointer text-slate-50 ${getRoleColorClass('banned')}`}>Banned</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="member">Member</SelectItem>
+                          <SelectItem value="veteran">Veteran</SelectItem>
+                          <SelectItem value="banned">Banned</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>
                   ) : (
-                    <span className={`flex flex-row border rounded-md p-1 left-0 ${getRoleColorClass(getProfileInfo(user.email, 'role'))}`}>
+                    <span className={`px-2 py-1 rounded ${getRoleColorClass(getProfileInfo(user.email, 'role') as string)}`}>
                       {getProfileInfo(user.email, 'role')}
                     </span>
                   )}
@@ -234,12 +276,14 @@ const AllUsersTable = ({ currentEmail }) => {
                 <TableCell>{format(new Date(user.created_at), 'dd/MM/yyyy')}</TableCell>
                 <TableCell>{user.id}</TableCell>
                 <TableCell>
-                    {user.email !== currentEmail && getProfileInfo(user.email, 'role') !== 'admin' ? (
-                        <Button onClick={() => handleUnsubscribe(user.id, user.email)} className='bg-red-600 text-slate-50 hover:bg-transparent hover:text-red-600'>
-                            Unsubscribe User
-                        </Button>
-                    ) : ("")}
-                    
+                  {user.email !== currentEmail && getProfileInfo(user.email, 'role') !== 'admin' && (
+                    <Button
+                      onClick={() => handleUnsubscribe(user.id, user.email)}
+                      className='bg-red-600 text-white hover:bg-red-700'
+                    >
+                      Unsubscribe
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

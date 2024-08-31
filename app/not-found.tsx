@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { GoHome } from "react-icons/go";
 import { AiOutlineProduct } from "react-icons/ai";
 import { CiUser } from "react-icons/ci";
-import Catalog from '@/components/home/catalog';
+import NotFoundContent from '@/components/error/notFoundContent';
 
-const Page = () => {
+const WebError = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     const toggleVisibilityMenu = () => {
@@ -52,11 +52,11 @@ const Page = () => {
             </div>
 
             <div
-            className={`text-white flex flex-row ml-2 mt-10 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
-                <Catalog></Catalog>
+            className={`text-white flex flex-row justify-center items-center ml-2 mt-10 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
+                <NotFoundContent backUrl="/"></NotFoundContent>
             </div>
         </>
     );
 };
 
-export default Page;
+export default WebError;

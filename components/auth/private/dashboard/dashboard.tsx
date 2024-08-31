@@ -7,14 +7,14 @@ import BelowSection from './belowSection'
 const Dashboard = ({user, email}) => {
     const [name, setName] = useState("---")
     const [surname, setSurname] = useState("---")
-    const [number, setNumber] = useState("---")
+    const [number, setNumber] = useState(0)
     const [orders, setOrders] = useState(0)
 
     useEffect(()=>{
         const getProfileCount = async ()=>{
             const {data, error} = await supabaseAdmin.auth.admin.listUsers()
 
-            setNumber(data.total)
+            setNumber(data.users.length)
         }
 
         const getOrdersCount = async ()=>{
@@ -65,7 +65,7 @@ const Dashboard = ({user, email}) => {
                         <span className='font-black text-sm'>Total Users</span>
                     </div>
                     <div className='transition-all ease-in-out duration-200 mt-20 p-4 flex flex-col justify-center items-center cursor-pointer border border-yellow-600 bg-yellow-600 text-slate-50 shadow-lg shadow-yellow-600 hover:text-yellow-600 hover:bg-transparent'>
-                        <Counter n={50}></Counter>
+                        <Counter n={0}></Counter>
                         <span className='font-black text-sm'>New Notifications</span>
                     </div>
                 </div>

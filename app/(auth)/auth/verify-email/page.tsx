@@ -1,15 +1,31 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CiMenuBurger } from "react-icons/ci";
 import { IoCloseOutline } from "react-icons/io5";
 import Link from 'next/link';
 import { GoHome } from "react-icons/go";
 import { AiOutlineProduct } from "react-icons/ai";
 import { CiUser } from "react-icons/ci";
-import Catalog from '@/components/home/catalog';
+import { useRouter } from 'next/navigation';
+import Verify from '@/components/auth/verify-email/verify';
 
 const Page = () => {
     const [isVisible, setIsVisible] = useState(false);
+    const [email, setEmail] = useState('')
+    
+    const router = useRouter()
+
+    useEffect(()=>{
+        const urlParams = new URLSearchParams(window.location.search)
+        const emailParam = urlParams.get('email')
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if(!emailParam ||  emailParam === '' ||  !regex.test(emailParam)){
+            router.push("/")
+        }else{
+            setEmail(emailParam)
+        }
+    }, [router])
 
     const toggleVisibilityMenu = () => {
         setIsVisible(!isVisible);
@@ -52,8 +68,8 @@ const Page = () => {
             </div>
 
             <div
-            className={`text-white flex flex-row ml-2 mt-10 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
-                <Catalog></Catalog>
+            className={`text-white flex flex-row justify-center items-center ml-2 mt-10 transition-all duration-250 ease-in ${isVisible ? 'opacity-0' : 'opacity-100'}`}>
+                <Verify email={email}></Verify>
             </div>
         </>
     );

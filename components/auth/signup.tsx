@@ -117,7 +117,7 @@ const Signup = () => {
           setIsError(true)
         }else{
           toast.success("You have created an account successfully\nCheck the email inbox to verify account")
-          router.push("/private")
+          router.push(`/auth/verify-email?email=${email}`)
         }
       }
     }else{

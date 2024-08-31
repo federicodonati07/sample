@@ -8,6 +8,20 @@ import supabase from '@/lib/supabase/supabaseClient';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+interface CountryType {
+  isoCode: string;
+  name: string;
+}
+
+interface StateType {
+  isoCode: string;
+  name: string;
+}
+
+interface CityType {
+  name: string;
+}
+
 const EditShippingInfo = ({
   country,
   state,
@@ -20,7 +34,6 @@ const EditShippingInfo = ({
   more_info,
   uuid,
 }) => {
-  // Initialize state values with 'unassigned' as default where appropriate
   const [inputCountryValue, setInputCountryValue] = useState<string>(country || 'unassigned');
   const [inputStateValue, setInputStateValue] = useState<string>(state || 'unassigned');
   const [inputCityValue, setInputCityValue] = useState<string>(city || 'unassigned');
@@ -32,8 +45,8 @@ const EditShippingInfo = ({
   const [inputMoreInfoValue, setInputMoreInfoValue] = useState<string>(more_info || '');
 
   const [isInvalidNumber, setIsInvalidNumber] = useState<boolean>(false);
-  const [states, setStates] = useState<State[]>([]);
-  const [cities, setCities] = useState<City[]>([]);
+  const [states, setStates] = useState<StateType[]>([]);
+  const [cities, setCities] = useState<CityType[]>([]);
 
   useEffect(() => {
     if (inputCountryValue !== 'unassigned') {
@@ -66,7 +79,7 @@ const EditShippingInfo = ({
     setInputCityValue(value === 'unassigned' ? '' : value);
   };
 
-  const handleEdit = async() => {
+  const handleEdit = async () => {
     if (
       inputAddressValue !== '' &&
       inputHouseNumberValue !== '' &&
@@ -84,7 +97,7 @@ const EditShippingInfo = ({
         } else {
           setIsInvalidNumber(false);
 
-          const {data, error} = await supabase
+          const { data, error } = await supabase
             .from("shipping_info")
             .update([{
               country: inputCountryValue,
@@ -99,9 +112,9 @@ const EditShippingInfo = ({
             }])
             .eq("profile_uuid", uuid)
 
-          if(error){
+          if (error) {
             toast.error(`Error: ${error.message}`)
-          }else{
+          } else {
             toast.success("Shipping info edited successfully")
           }
         }
@@ -179,12 +192,12 @@ const EditShippingInfo = ({
               disabled={inputStateValue === 'unassigned'}
             >
               <SelectTrigger className="w-full border border-gray-300 rounded-lg">
-                <span>{inputCityValue !== 'unassigned' ? cities.find(c => c.name === inputCityValue)?.name : 'Select City'}</span>
+                <span>{inputCityValue !== 'unassigned' ? inputCityValue : 'Select City'}</span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="unassigned">Select City</SelectItem>
                 {cities.map((city) => (
-                  <SelectItem key={city.id} value={city.name}>
+                  <SelectItem key={city.name} value={city.name}>
                     {city.name}
                   </SelectItem>
                 ))}
@@ -234,7 +247,7 @@ const EditShippingInfo = ({
               />
             </div>
           </div>
-          
+
           <div className="flex flex-col mb-4">
             <label className="text-lg font-semibold mb-1">
               {isInvalidNumber ? (
@@ -251,7 +264,7 @@ const EditShippingInfo = ({
               className="border border-gray-300 rounded-lg p-2"
             />
           </div>
-          
+
           <div className="flex flex-col">
             <label className="text-lg font-semibold mb-1">More Info:</label>
             <Input
@@ -269,8 +282,8 @@ const EditShippingInfo = ({
           </Button>
         </div>
       </div>
-    <ToastContainer />
-  </>
+      <ToastContainer />
+    </>
   );
 };
 
