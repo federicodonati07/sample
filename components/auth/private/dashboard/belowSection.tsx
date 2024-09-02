@@ -98,68 +98,70 @@ const BelowSection = ({ currentEmail }) => {
 
     return (
         <>
-            <Accordion
-                type="single"
-                collapsible
-                className="w-full m-2"
-                value={activeAccordion}
-                onValueChange={handleAccordionChange}
-            >
-                <AccordionItem value="item-1">
-                    <AccordionTrigger>Admin</AccordionTrigger>
-                    <AccordionContent>
-                        {areData ? (
-                            <div className="overflow-x-auto">
-                                <Table className="w-full">
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Name</TableHead>
-                                            <TableHead>Surname</TableHead>
-                                            <TableHead>Email</TableHead>
-                                            <TableHead>Uuid - auth</TableHead>
-                                            <TableHead>Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody className='font-black'>
-                                        {adminUsers.map((user) => (
-                                            <TableRow key={user.id}>
-                                                <TableCell>{user.name}</TableCell>
-                                                <TableCell>{user.surname}</TableCell>
-                                                <TableCell>{user.email}</TableCell>
-                                                <TableCell>
-                                                    <div className="overflow-auto">
-                                                        {uuidAuth[user.email] || "---"}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {user.email !== currentEmail && (
-                                                        <Button 
-                                                            onClick={() => handleRemoveAdmin(user.email)} 
-                                                            className='cursor-pointer border border-red-600 bg-red-600 text-slate-50 hover:text-red-600 hover:bg-transparent'
-                                                        >
-                                                            <IoPersonRemoveOutline className='text-xl font-black'/>
-                                                        </Button>
-                                                    )}
-                                                </TableCell>
+            <div className='mt-5'>
+                <Accordion
+                    type="single"
+                    collapsible
+                    className="w-full m-2"
+                    value={activeAccordion}
+                    onValueChange={handleAccordionChange}
+                >
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger>Admin</AccordionTrigger>
+                        <AccordionContent>
+                            {areData ? (
+                                <div className="overflow-x-auto">
+                                    <Table className="w-full">
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Name</TableHead>
+                                                <TableHead>Surname</TableHead>
+                                                <TableHead>Email</TableHead>
+                                                <TableHead>Uuid - auth</TableHead>
+                                                <TableHead>Actions</TableHead>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        ) : (
-                            <p>There are no admin users</p>
-                        )}
-                    </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-2">
-                    <AccordionTrigger>All Users</AccordionTrigger>
-                    <AccordionContent>
-                        <AllUsersTable currentEmail={currentEmail}></AllUsersTable>
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-            {/* Aggiungi ToastContainer */}
-            <ToastContainer />
+                                        </TableHeader>
+                                        <TableBody className='font-black'>
+                                            {adminUsers.map((user) => (
+                                                <TableRow key={user.id}>
+                                                    <TableCell>{user.name}</TableCell>
+                                                    <TableCell>{user.surname}</TableCell>
+                                                    <TableCell>{user.email}</TableCell>
+                                                    <TableCell>
+                                                        <div className="overflow-auto">
+                                                            {uuidAuth[user.email] || "---"}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {user.email !== currentEmail && (
+                                                            <Button 
+                                                                onClick={() => handleRemoveAdmin(user.email)} 
+                                                                className='cursor-pointer border border-red-600 bg-red-600 text-slate-50 hover:text-red-600 hover:bg-transparent'
+                                                            >
+                                                                <IoPersonRemoveOutline className='text-xl font-black'/>
+                                                            </Button>
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            ) : (
+                                <p>There are no admin users</p>
+                            )}
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-2">
+                        <AccordionTrigger>All Users</AccordionTrigger>
+                        <AccordionContent>
+                            <AllUsersTable currentEmail={currentEmail}></AllUsersTable>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+                {/* Aggiungi ToastContainer */}
+                <ToastContainer />
+            </div>
         </>
     )
 }

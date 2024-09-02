@@ -66,7 +66,7 @@ const Page = () => {
             ) : (
                 <>
                     <div className='flex flex-row justify-center items-center m-2'>
-                        <span className='text-xl font-black'>you are not authorized</span>
+                        <span className='text-xl font-black m-2'>you are not authorized</span>
                         <Link href="/private">
                             <Button className='bg-slate-50 text-slate-950 font-black'>Back</Button>
                         </Link>
