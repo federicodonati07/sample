@@ -47,15 +47,21 @@ const TotalOrders = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [moreInfo, setMoreInfo] = useState('');
 
-    const formatDateTime = (dateString) => {
+    const [sortKey, setSortKey] = useState('');
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [dateFilter, setDateFilter] = useState('newest');
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const formatDateTime = (dateString: string) => {
         const date = parseISO(dateString);
         return format(date, "d MMMM yyyy - HH:mm", { locale: it });
     };
 
-    const handleDrawer = async (uuid) => {
+    const handleDrawer = async (uuid: string) => {
         setIsDrawerOpen(true);
 
-        const { data, error } = await supabase
+        const { data } = await supabase
             .from('shipping_info')
             .select('*')
             .eq('profile_uuid', uuid)
@@ -74,13 +80,13 @@ const TotalOrders = () => {
         }
     };
 
-    const handleOpenChange = (open) => {
+    const handleOpenChange = (open: boolean) => {
         setIsDrawerOpen(open);
     };
 
     useEffect(() => {
         const fetchAllOrders = async () => {
-            const { data, error } = await supabase
+            const { data } = await supabase
                 .from('orders')
                 .select('*');
 
@@ -92,11 +98,74 @@ const TotalOrders = () => {
         fetchAllOrders();
     }, []);
 
+    const handleSearchChange = (e) => {
+        const query = e.target.value.toLowerCase();
+        setSortKey(query.includes('@') ? 'profile_email' : 'order_uuid');
+        setSearchQuery(query);
+    };
+
+    const filteredOrders = orders
+        .filter((order) =>
+            (statusFilter ? order.order_status === statusFilter : true) &&
+            (searchQuery
+                ? order[sortKey]?.toLowerCase().includes(searchQuery)
+                : true)
+        );
+
+    const sortedAndFilteredOrders = filteredOrders
+        .sort((a, b) => {
+            if (sortKey === 'created_at') {
+                const dateA = new Date(a[sortKey]);
+                const dateB = new Date(b[sortKey]);
+
+                if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+                    return 0; // Se una delle date non è valida, le considera uguali
+                }
+
+                return dateFilter === 'newest'
+                    ? dateB.getTime() - dateA.getTime()
+                    : dateA.getTime() - dateB.getTime();
+            }
+
+            const compare = String(a[sortKey]).localeCompare(String(b[sortKey]));
+            return sortOrder === 'asc' ? compare : -compare;
+        });
+
     return (
         <>
             <div className='flex flex-col justify-center items-center mt-5 px-4'>
+                <div className='w-full max-w-4xl mb-4'>
+                    <div className='flex justify-between mb-4'>
+                        <div className='flex items-center space-x-2'>
+                            <input
+                                type='text'
+                                placeholder='Search by UUID or Email'
+                                className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white'
+                                onChange={handleSearchChange}
+                            />
+                            <select
+                                className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white'
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value=''>All Statuses</option>
+                                <option value='unread'>Unread</option>
+                                <option value='processing'>Processing</option>
+                                <option value='shipped'>Shipped</option>
+                                <option value='delivered'>Delivered</option>
+                                <option value='canceled'>Canceled</option>
+                            </select>
+                            <select
+                                className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white'
+                                onChange={(e) => setDateFilter(e.target.value)}
+                            >
+                                <option value='newest'>Newest First</option>
+                                <option value='oldest'>Oldest First</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <div className='w-full max-w-4xl h-[400px] overflow-y-auto'>
-                    {orders.map((order) => (
+                    {sortedAndFilteredOrders.map((order) => (
                         <React.Fragment key={order.id}>
                             <div className='flex flex-col border border-gray-700 rounded-xl bg-gray-800 text-white p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 mb-4'>
                                 <div className='flex items-center justify-between mb-4'>
@@ -120,7 +189,7 @@ const TotalOrders = () => {
                                         <div className='flex flex-col'>
                                             <div className='flex items-center mb-2'>
                                                 <MdAlternateEmail className='text-2xl text-teal-400 mr-2' />
-                                                <div 
+                                                <div
                                                     onClick={() => handleDrawer(order.profile_uuid)}
                                                     className='flex flex-row cursor-pointer decoration-teal-400 hover:underline'>
                                                     <span className='font-medium text-teal-400'>{order.profile_email}</span>
