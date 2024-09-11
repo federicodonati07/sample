@@ -1,124 +1,114 @@
-import supabaseAdmin from '@/lib/supabase/supabaseAdmin'
-import React, { useEffect, useState } from 'react'
-import Counter from './counter'
-import supabase from '@/lib/supabase/supabaseClient'
-import BelowSection from './belowSection'
-import TotalOrders from './totalOrders'
+import supabaseAdmin from '@/lib/supabase/supabaseAdmin';
+import React, { useEffect, useState } from 'react';
+import Counter from './counter';
+import supabase from '@/lib/supabase/supabaseClient';
+import BelowSection from './belowSection';
+import TotalOrders from './totalOrders';
 
-const Dashboard = ({user, email}) => {
-    const [name, setName] = useState("---")
-    const [surname, setSurname] = useState("---")
-    const [number, setNumber] = useState(0)
-    const [orders, setOrders] = useState(0)
-    const [notifications, setNotifications] = useState(0)
-    const [section, setSection] = useState('users')
+const Dashboard = ({ user, email }) => {
+    const [name, setName] = useState("---");
+    const [surname, setSurname] = useState("---");
+    const [number, setNumber] = useState(0);
+    const [orders, setOrders] = useState(0);
+    const [notifications, setNotifications] = useState(0);
+    const [section, setSection] = useState('users');
 
-    const handleSection = (section:string)=>{
-        setSection(section)
-    }
+    const handleSection = (section: string) => {
+        setSection(section);
+    };
 
-    useEffect(()=>{
-        const getNotificationsCount = async ()=>{
-            const {data, error} = await supabase
+    useEffect(() => {
+        const getNotificationsCount = async () => {
+            const { data, error } = await supabase
                 .from('orders')
                 .select("*")
-                .eq('order_status', "unread")
+                .eq('order_status', "unread");
 
-            if(data){
-               setNotifications(data!.length)
-            }else{
-                setNotifications(0)
-            }
-            
-        }
+            setNotifications(data ? data.length : 0);
+        };
 
-        const getProfileCount = async ()=>{
-            const {data, error} = await supabaseAdmin.auth.admin.listUsers()
+        const getProfileCount = async () => {
+            const { data, error } = await supabaseAdmin.auth.admin.listUsers();
 
-            setNumber(data.users.length)
-        }
+            setNumber(data.users.length);
+        };
 
-        const getOrdersCount = async ()=>{
-            const {data, error} = await supabase
+        const getOrdersCount = async () => {
+            const { data, error } = await supabase
                 .from("orders")
-                .select("*")
-                
-            if(data){
-                setOrders(data!.length)
-            }else{
-                setOrders(0)
-            }
-        }
+                .select("*");
 
-        const fetchProfileInfo = async ()=>{
-            const {data, error} = await supabase
+            setOrders(data ? data.length : 0);
+        };
+
+        const fetchProfileInfo = async () => {
+            const { data, error } = await supabase
                 .from("profiles")
                 .select("*")
                 .eq("email", email)
-                .single()
+                .single();
 
-            if(data){
-                setName(data.name)
-                setSurname(data.surname)
+            if (data) {
+                setName(data.name);
+                setSurname(data.surname);
             }
-        }
-        fetchProfileInfo()
-        getProfileCount()
-        getOrdersCount()
-        getNotificationsCount()
+        };
 
-
-    }, [email, user])
+        fetchProfileInfo();
+        getProfileCount();
+        getOrdersCount();
+        getNotificationsCount();
+    }, [email, user]);
 
     return (
-        <>
-            <div className='flex flex-col justify-center items-center m-2'>
-                <div className='flex flex-col lg:block '>
-                    <span className='text-2xl font-black m-2'>DashBoard</span>
-                    <span className='text-sm m-2'>Hi {name} {surname}</span>
-                </div>
-                <div className='grid grid-cols-3 justify-center items-center text-center lg:grid lg:grid-cols-3 lg:gap-10'>
-                    <div 
-                         onClick={(e)=>handleSection('torders')}
-                        className='transition-all ease-in-out duration-200 mt-20 p-4 flex flex-col justify-center items-center cursor-pointer border border-red-600 bg-red-600 text-slate-50 shadow-lg shadow-red-600 hover:text-red-600 hover:bg-transparent'>
-                        <Counter n={orders}></Counter>
-                        <span className='font-black text-sm'>Total Orders</span>
-                    </div>
-                    <div
-                        onClick={(e)=>handleSection('users')}
-                        className='transition-all ease-in-out duration-200 mt-20 p-4 flex flex-col justify-center items-center cursor-pointer border border-slate-50 bg-slate-50 text-slate-950 shadow-lg shadow-slate-50 hover:text-slate-50 hover:bg-transparent'>
-                        <Counter n={number}></Counter>
-                        <span className='font-black text-sm'>Total Users</span>
-                    </div>
-                    <div 
-                         onClick={(e)=>handleSection('notifications')}
-                        className='transition-all ease-in-out duration-200 mt-20 p-4 flex flex-col justify-center items-center cursor-pointer border border-yellow-600 bg-yellow-600 text-slate-50 shadow-lg shadow-yellow-600 hover:text-yellow-600 hover:bg-transparent'>
-                        <Counter n={notifications}></Counter>
-                        <span className='font-black text-sm'>New Notifications</span>
-                    </div>
-                </div>
-
-                {section === "users" ? (
-                    <>
-                        <div className='md:absolute  md:top-1/2'>
-                            <BelowSection currentEmail={email}></BelowSection>
-                        </div>
-                    </>
-                ) : section === "torders" ? (
-                    <>  
-                        <div className='md:absolute  md:top-1/2 overflow-y-auto w-full h-auto'>
-                            <TotalOrders></TotalOrders>
-                        </div>
-                    </>
-                ) : section === "notifications" ? (
-                    <>
-
-                    </>
-                ) : ""}
-                
+        <div className="flex flex-col items-center p-4 bg-gray-900 min-h-screen">
+            <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+                <p className="text-lg text-gray-400">Hi {name} {surname}</p>
             </div>
-        </>
-    )
-}
 
-export default Dashboard
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+                <div
+                    onClick={() => handleSection('torders')}
+                    className="transition-transform transform hover:scale-105 p-6 bg-red-600 text-white rounded-lg shadow-lg cursor-pointer hover:bg-red-700"
+                >
+                    <Counter n={orders} />
+                    <p className="mt-2 font-bold text-xl">Total Orders</p>
+                </div>
+
+                <div
+                    onClick={() => handleSection('users')}
+                    className="transition-transform transform hover:scale-105 p-6 bg-slate-50 text-slate-950 rounded-lg shadow-lg cursor-pointer hover:bg-slate-200"
+                >
+                    <Counter n={number} />
+                    <p className="mt-2 font-bold text-xl">Total Users</p>
+                </div>
+
+                <div
+                    onClick={() => handleSection('notifications')}
+                    className="transition-transform transform hover:scale-105 p-6 bg-yellow-600 text-white rounded-lg shadow-lg cursor-pointer hover:bg-yellow-700"
+                >
+                    <Counter n={notifications} />
+                    <p className="mt-2 font-bold text-xl">New Notifications</p>
+                </div>
+            </div>
+
+            <div className="w-full mt-8">
+                {section === "users" && (
+                    <BelowSection currentEmail={email} />
+                )}
+                {section === "torders" && (
+                    <TotalOrders />
+                )}
+                {section === "notifications" && (
+                    <div className="p-4 bg-gray-800 text-gray-200 rounded-lg">
+                        {/* Placeholder for notifications */}
+                        <p>No notifications available.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default Dashboard;

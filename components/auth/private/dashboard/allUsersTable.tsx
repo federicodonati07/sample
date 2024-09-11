@@ -140,15 +140,15 @@ const AllUsersTable: React.FC<AllUsersTableProps> = ({ currentEmail }) => {
         return updatedProfiles;
       });
 
-      const {data, error} = await supabase
+      const { data, error } = await supabase
         .from("shipping_info")
         .delete()
-        .eq('profile_uuid', uuid)
+        .eq('profile_uuid', uuid);
 
-      if(error){
+      if (error) {
         console.error('Error deleting shipping info:', error.message);
       }
-      
+
     } catch (error: any) {
       console.error('Error unsubscribing user:', error.message);
       toast.error(`Error unsubscribing user: ${error.message}`);
@@ -181,27 +181,29 @@ const AllUsersTable: React.FC<AllUsersTableProps> = ({ currentEmail }) => {
 
   return (
     <>
-      <div className='flex flex-wrap items-center gap-2 mb-4'>
+      <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-gray-800 rounded-lg">
         <Input
           type="text"
           onChange={(e) => handleSearch(e.target.value)}
-          placeholder='Search by name, email, or UUID'
-          className='w-full md:w-52'
+          placeholder="Search by name, email, or UUID"
+          className="flex-1 md:w-64"
         />
-        <Button
-          onClick={() => handleSortByDate('desc')}
-          className='flex items-center gap-2 bg-slate-50 text-slate-900 hover:bg-slate-200'
-        >
-          Sort by Recent <FaCalendarAlt />
-        </Button>
-        <Button
-          onClick={() => handleSortByDate('asc')}
-          className='flex items-center gap-2 bg-slate-50 text-slate-900 hover:bg-slate-200'
-        >
-          Sort by Oldest <FaCalendarAlt />
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => handleSortByDate('desc')}
+            className="flex items-center gap-2 bg-slate-50 text-slate-900 hover:bg-slate-200 rounded-lg"
+          >
+            Sort by Recent <FaCalendarAlt />
+          </Button>
+          <Button
+            onClick={() => handleSortByDate('asc')}
+            className="flex items-center gap-2 bg-slate-50 text-slate-900 hover:bg-slate-200 rounded-lg"
+          >
+            Sort by Oldest <FaCalendarAlt />
+          </Button>
+        </div>
         <Select value={roleFilter} onValueChange={filterByRole}>
-          <SelectTrigger className='w-full md:w-52'>
+          <SelectTrigger>
             <SelectValue placeholder="Filter by role" />
           </SelectTrigger>
           <SelectContent>
@@ -216,21 +218,21 @@ const AllUsersTable: React.FC<AllUsersTableProps> = ({ currentEmail }) => {
           </SelectContent>
         </Select>
         {isLoading && (
-          <div className='flex justify-center items-center'>
+          <div className="flex justify-center items-center w-full">
             <ThreeDots
               visible={true}
               height="30"
               width="30"
               radius="5"
-              color='#000'
+              color='#ffffff'
               ariaLabel="three-dots-loading"
             />
           </div>
         )}
       </div>
 
-      <div className="overflow-x-auto">
-        <Table className="min-w-full">
+      <div className="overflow-x-auto bg-gray-900 p-4 rounded-lg shadow-lg">
+        <Table className="min-w-full bg-gray-800 text-white">
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -279,7 +281,7 @@ const AllUsersTable: React.FC<AllUsersTableProps> = ({ currentEmail }) => {
                   {user.email !== currentEmail && getProfileInfo(user.email, 'role') !== 'admin' && (
                     <Button
                       onClick={() => handleUnsubscribe(user.id, user.email)}
-                      className='bg-red-600 text-white hover:bg-red-700'
+                      className="bg-red-600 text-white hover:bg-red-700 rounded-lg"
                     >
                       Unsubscribe
                     </Button>
@@ -296,3 +298,4 @@ const AllUsersTable: React.FC<AllUsersTableProps> = ({ currentEmail }) => {
 };
 
 export default AllUsersTable;
+

@@ -139,29 +139,29 @@ const TotalOrders = () => {
         });
 
     return (
-        <>
-            <div className='flex flex-col justify-center items-center mt-5 px-4'>
-                <div className='w-full max-w-4xl mb-4'>
-                    <div className='flex justify-between mb-4'>
-                        <div className='flex items-center space-x-2'>
-                            <input
-                                type='text'
-                                placeholder='Search by UUID or Email'
-                                className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white'
-                                onChange={handleSearchChange}
-                            />
-                            <select
-                                className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white'
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                            >
-                                <option value=''>All Statuses</option>
-                                <option value='unread'>Unread</option>
-                                <option value='processing'>Processing</option>
-                                <option value='shipped'>Shipped</option>
-                                <option value='delivered'>Delivered</option>
-                                <option value='canceled'>Canceled</option>
-                            </select>
+        <div className='flex flex-col justify-center items-center mt-5 px-4'>
+            <div className='w-full max-w-6xl mb-4'>
+                <div className='flex flex-col md:flex-row justify-between mb-4'>
+                    <div className='flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-2'>
+                        <input
+                            type='text'
+                            placeholder='Search by UUID or Email'
+                            className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white flex-1'
+                            onChange={handleSearchChange}
+                        />
+                        <select
+                            className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white flex-1 md:flex-none'
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value=''>All Statuses</option>
+                            <option value='unread'>Unread</option>
+                            <option value='processing'>Processing</option>
+                            <option value='shipped'>Shipped</option>
+                            <option value='delivered'>Delivered</option>
+                            <option value='canceled'>Canceled</option>
+                        </select>
 
+                        <div className='flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2'>
                             <button
                                 className={`p-2 border ${dateFilter === 'newest' ? 'bg-blue-600' : 'bg-gray-800'} border-gray-600 rounded-lg text-white`}
                                 onClick={() => setDateFilter('newest')}
@@ -175,72 +175,75 @@ const TotalOrders = () => {
                                 Oldest First
                             </button>
                             <Button
-                                className={`p-2 m-4 border ${showArchived ? 'bg-red-600' : 'bg-green-600'} border-gray-600 rounded-lg text-white`}
+                                className={`p-2 border ${showArchived ? 'bg-red-600' : 'bg-green-600'} border-gray-600 rounded-lg text-white`}
                                 onClick={() => setShowArchived(!showArchived)}
-                            >{showArchived ? <FiArchive className='text-xl'/> : <RiArchiveStackLine className='text-xl'/>} Archived</Button>
+                            >
+                                {showArchived ? <FiArchive className='text-xl'/> : <RiArchiveStackLine className='text-xl'/>} Archived
+                            </Button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div className='w-full max-w-4xl h-[400px] overflow-y-auto'>
-                    {sortedAndFilteredOrders.map((order) => (
-                        <React.Fragment key={order.id}>
-                            <div className='flex flex-col border border-gray-700 rounded-xl bg-gray-800 text-white p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 mb-4'>
-                                <div className='flex items-center justify-between mb-4'>
-                                    <div className='flex items-center'>
-                                                                                <FaBox className='text-3xl text-yellow-400 mr-3' />
-                                        <span className='font-bold text-xl text-orange-500'>{order.order_uuid}</span>
-                                        <div className='ml-4'>
-                                            <div className={`flex items-center space-x-2 p-2 rounded-full ${orderStatusColors[order.order_status]} shadow-md`}>
-                                                <span className='text-md font-black capitalize'>{order.order_status}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                    <div className='flex flex-col'>
-                                        <div className='flex flex-col'>
-                                            <div className='flex items-center mb-2'>
-                                                <MdAlternateEmail className='text-2xl text-teal-400 mr-2' />
-                                                <div
-                                                    onClick={() => handleDrawer(order.profile_uuid)}
-                                                    className='flex flex-row cursor-pointer decoration-teal-400 hover:underline'>
-                                                    <span className='font-medium text-teal-400'>{order.profile_email}</span>
-                                                    <FaExternalLinkAlt className='text-teal-400 ml-2' />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className='flex items-center mb-2'>
-                                            <FaCalendarAlt className='text-2xl text-blue-400 mr-2' />
-                                            <span className='font-medium'>{formatDateTime(order.created_at)}</span>
-                                        </div>
-                                        <div className='flex items-center mb-2'>
-                                            <IoPricetags className='text-2xl text-orange-400 mr-2' />
-                                            <span className='font-medium text-yellow-400'>{order.price.toFixed(2)} €</span>
+            <div className='w-full max-w-6xl h-[400px] overflow-y-auto'>
+                {sortedAndFilteredOrders.map((order) => (
+                    <React.Fragment key={order.id}>
+                        <div className='flex flex-col border border-gray-700 rounded-xl bg-gray-800 text-white p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 mb-4'>
+                            <div className='flex flex-col md:flex-row items-start md:items-center justify-between mb-4'>
+                                <div className='flex items-center'>
+                                    <FaBox className='text-3xl text-yellow-400 mr-3' />
+                                    <span className='font-bold text-xl text-orange-500'>{order.order_uuid}</span>
+                                    <div className='ml-4'>
+                                        <div className={`flex items-center space-x-2 p-2 rounded-full ${orderStatusColors[order.order_status]} shadow-md`}>
+                                            <span className='text-md font-black capitalize'>{order.order_status}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <OrderShippingInfo
-                                open={isDrawerOpen}
-                                onOpenChange={handleOpenChange}
-                                email={order.profile_email}
-                                country={country}
-                                state={state}
-                                city={city}
-                                address={address}
-                                houseNumber={houseNumber}
-                                apartamentNumber={apartamentNumber}
-                                postalCode={postalCode}
-                                phoneNumber={phoneNumber}
-                                moreInfo={moreInfo} />
-                        </React.Fragment>
-                    ))}
-                </div>
+                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                <div className='flex flex-col'>
+                                    <div className='flex flex-col'>
+                                        <div className='flex items-center mb-2'>
+                                            <MdAlternateEmail className='text-2xl text-teal-400 mr-2' />
+                                            <div
+                                                onClick={() => handleDrawer(order.profile_uuid)}
+                                                className='flex flex-row cursor-pointer decoration-teal-400 hover:underline'>
+                                                                                                <span className='font-medium text-teal-400'>{order.profile_email}</span>
+                                                <FaExternalLinkAlt className='text-teal-400 ml-2' />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className='flex items-center mb-2'>
+                                        <FaCalendarAlt className='text-2xl text-blue-400 mr-2' />
+                                        <span className='font-medium'>{formatDateTime(order.created_at)}</span>
+                                    </div>
+                                    <div className='flex items-center mb-2'>
+                                        <IoPricetags className='text-2xl text-orange-400 mr-2' />
+                                        <span className='font-medium text-yellow-400'>{order.price.toFixed(2)} €</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <OrderShippingInfo
+                            open={isDrawerOpen}
+                            onOpenChange={handleOpenChange}
+                            email={order.profile_email}
+                            country={country}
+                            state={state}
+                            city={city}
+                            address={address}
+                            houseNumber={houseNumber}
+                            apartamentNumber={apartamentNumber}
+                            postalCode={postalCode}
+                            phoneNumber={phoneNumber}
+                            moreInfo={moreInfo} 
+                        />
+                    </React.Fragment>
+                ))}
             </div>
-        </>
+        </div>
     );
 }
 

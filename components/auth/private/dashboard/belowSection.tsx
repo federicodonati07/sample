@@ -21,7 +21,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AllUsersTable from './allUsersTable'
 
-interface Data{
+interface Data {
     id: number;
     name: string;
     surname: string;
@@ -32,7 +32,7 @@ interface Data{
 
 const BelowSection = ({ currentEmail }) => {
     const [areData, setAreData] = useState(false)
-    const [adminUsers, setAdminUsers] = useState<Data[]>([]) // Stato per memorizzare gli utenti admin
+    const [adminUsers, setAdminUsers] = useState<Data[]>([])
     const [uuidAuth, setUuidAuth] = useState({})
     const [activeAccordion, setActiveAccordion] = useState('')
 
@@ -53,7 +53,7 @@ const BelowSection = ({ currentEmail }) => {
                 setAreData(false)
             } else {
                 setAreData(true)
-                setAdminUsers(data) // Memorizza i dati degli utenti admin
+                setAdminUsers(data)
 
                 const fetchAllAuthUserUuids = async () => {
                     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers()
@@ -78,7 +78,7 @@ const BelowSection = ({ currentEmail }) => {
     const handleAccordionChange = (value) => {
         setActiveAccordion(value)
         if (value === "item-1") {
-            fetchAdminUsers() // Ricarica gli utenti admin quando l'accordion viene espanso
+            fetchAdminUsers()
         }
     }
 
@@ -111,7 +111,7 @@ const BelowSection = ({ currentEmail }) => {
                         <AccordionContent>
                             {areData ? (
                                 <div className="overflow-x-auto">
-                                    <Table className="w-full">
+                                    <Table className="w-full min-w-max">
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Name</TableHead>
@@ -159,7 +159,6 @@ const BelowSection = ({ currentEmail }) => {
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
-                {/* Aggiungi ToastContainer */}
                 <ToastContainer />
             </div>
         </>
