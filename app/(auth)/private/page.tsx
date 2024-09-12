@@ -22,7 +22,8 @@ const Page = () => {
         surname: '---',
         email: '---',
         role: '---',
-        orders: '---'
+        orders: '---',
+        uuid: ""
     });
     const [shipping, setShipping] = useState({
         country: '---',
@@ -54,15 +55,25 @@ const Page = () => {
         if (error) {
             console.error("Error fetching user info:", error);
         } else if (data) {
+            const {data: dataCO, error: errorCO} = await supabase  //  calcola gli ordini totali
+                .from("orders")
+                .select("*")
+                .eq("profile_uuid", uuid)
+                .in('order_status', ['unread', 'processing', 'shipped', 'delivered'])
+
+            const ordersL = dataCO?.length || 0
+            console.log(dataCO, ordersL, error)
+
             setProfile(prev => ({
                 ...prev,
                 name: data.name || '---',
                 surname: data.surname || '---',
                 role: data.role || '---',
-                orders: data.orders
+                orders: ordersL.toString(),
+                uuid: uuid
             }));
         }
-    }, []);
+    }, [uuid]);
 
     const checkAndInsertProfileData = useCallback(async (email:string) => {
         const { data, error } = await supabase
@@ -202,6 +213,7 @@ const Page = () => {
                             email={profile.email}
                             role={profile.role}
                             orders={profile.orders}
+                            uuid={profile.uuid}
                         />
                         {isShippingSetted ? (
                             <EditShippingInfo

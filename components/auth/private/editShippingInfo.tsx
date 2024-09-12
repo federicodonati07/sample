@@ -113,9 +113,9 @@ const EditShippingInfo = ({
             .eq("profile_uuid", uuid)
 
           if (error) {
-            toast.error(`Error: ${error.message}`)
+            toast.error(`Error: ${error.message}`);
           } else {
-            toast.success("Shipping info edited successfully")
+            toast.success("Shipping info edited successfully");
           }
         }
       } catch {
@@ -140,21 +140,19 @@ const EditShippingInfo = ({
 
   return (
     <>
-      <div className="lg:border lg:border-gray-300 lg:rounded-lg p-4 lg:max-w-3xl lg:mx-auto shadow-lg">
-        <div className="text-center mb-4">
-          <span className="text-2xl font-bold">Shipping Information</span>
-        </div>
+      <div className="max-w-4xl mx-auto p-6 bg-gray-900 shadow-lg rounded-lg border border-gray-900 mt-4">
+        <h2 className="text-3xl font-extrabold text-white text-center mb-6">Shipping Information</h2>
         <div className="space-y-4">
           <div className="flex flex-col">
-            <label className="text-lg font-semibold mb-1">Country:</label>
+            <label className="text-lg font-semibold mb-1 text-gray-300">Country:</label>
             <Select
               value={inputCountryValue}
               onValueChange={handleCountryChange}
             >
-              <SelectTrigger className="w-full border border-gray-300 rounded-lg">
+              <SelectTrigger className="w-full border border-gray-300 rounded-lg bg-gray-800 text-gray-300">
                 <span>{inputCountryValue !== 'unassigned' ? Country.getCountryByCode(inputCountryValue)?.name : 'Select Country'}</span>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-gray-800 text-gray-300">
                 <SelectItem value="unassigned">Select Country</SelectItem>
                 {Country.getAllCountries().map((country) => (
                   <SelectItem key={country.isoCode} value={country.isoCode}>
@@ -165,16 +163,16 @@ const EditShippingInfo = ({
             </Select>
           </div>
           <div className="flex flex-col">
-            <label className="text-lg font-semibold mb-1">State:</label>
+            <label className="text-lg font-semibold mb-1 text-gray-300">State:</label>
             <Select
               value={inputStateValue}
               onValueChange={handleStateChange}
               disabled={inputCountryValue === 'unassigned'}
             >
-              <SelectTrigger className="w-full  border border-gray-300 rounded-lg">
+              <SelectTrigger className="w-full border border-gray-300 rounded-lg bg-gray-800 text-gray-300">
                 <span>{inputStateValue !== 'unassigned' ? states.find(s => s.isoCode === inputStateValue)?.name : 'Select State'}</span>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-gray-800 text-gray-300">
                 <SelectItem value="unassigned">Select State</SelectItem>
                 {states.map((state) => (
                   <SelectItem key={state.isoCode} value={state.isoCode}>
@@ -185,16 +183,16 @@ const EditShippingInfo = ({
             </Select>
           </div>
           <div className="flex flex-col">
-            <label className="text-lg font-semibold mb-1">City:</label>
+            <label className="text-lg font-semibold mb-1 text-gray-300">City:</label>
             <Select
               value={inputCityValue}
               onValueChange={handleCityChange}
               disabled={inputStateValue === 'unassigned'}
             >
-              <SelectTrigger className="w-full border border-gray-300 rounded-lg">
+              <SelectTrigger className="w-full border border-gray-300 rounded-lg bg-gray-800 text-gray-300">
                 <span>{inputCityValue !== 'unassigned' ? inputCityValue : 'Select City'}</span>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-gray-800 text-gray-300">
                 <SelectItem value="unassigned">Select City</SelectItem>
                 {cities.map((city) => (
                   <SelectItem key={city.name} value={city.name}>
@@ -207,51 +205,51 @@ const EditShippingInfo = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col">
-              <label className="text-lg font-semibold mb-1">Address:</label>
+              <label className="text-lg font-semibold mb-1 text-gray-300">Address:</label>
               <Input
                 type="text"
                 value={inputAddressValue}
                 onChange={(e) => setInputAddressValue(e.target.value)}
                 placeholder="Insert a value"
-                className="border border-gray-300 rounded-lg p-2"
+                className="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-lg font-semibold mb-1">House N.:</label>
+              <label className="text-lg font-semibold mb-1 text-gray-300">House N.:</label>
               <Input
                 type="text"
                 value={inputHouseNumberValue}
                 onChange={(e) => setInputHouseNumberValue(e.target.value)}
                 placeholder="Insert a value"
-                className="border border-gray-300 rounded-lg p-2"
+                className="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-lg font-semibold mb-1">Apartament N.:</label>
+              <label className="text-lg font-semibold mb-1 text-gray-300">Apartament N.:</label>
               <Input
                 type="text"
                 value={inputApartamentNumberValue}
                 onChange={(e) => setInputApartamentNumberValue(e.target.value)}
                 placeholder="Insert a value"
-                className="border border-gray-300 rounded-lg p-2"
+                className="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
               />
             </div>
             <div className="flex flex-col">
-              <label className="text-lg font-semibold mb-1">Postal Code:</label>
+              <label className="text-lg font-semibold mb-1 text-gray-300">Postal Code:</label>
               <Input
                 type="text"
                 value={inputPostalCodeValue}
                 onChange={(e) => setInputPostalCodeValue(e.target.value)}
                 placeholder="Insert a value"
-                className="border border-gray-300 rounded-lg p-2"
+                className="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
               />
             </div>
           </div>
 
           <div className="flex flex-col mb-4">
-            <label className="text-lg font-semibold mb-1">
+            <label className="text-lg font-semibold mb-1 text-gray-300">
               {isInvalidNumber ? (
-                <span className="text-red-600">Invalid Phone Number</span>
+                <span className="text-red-500">Invalid Phone Number</span>
               ) : (
                 'Phone Number (with +):'
               )}
@@ -261,23 +259,23 @@ const EditShippingInfo = ({
               value={inputPhoneNumberValue}
               onChange={(e) => setInputPhoneNumberValue(e.target.value)}
               placeholder="Insert a value"
-              className="border border-gray-300 rounded-lg p-2"
+              className="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
             />
           </div>
 
           <div className="flex flex-col">
-            <label className="text-lg font-semibold mb-1">More Info:</label>
+            <label className="text-lg font-semibold mb-1 text-gray-300">More Info:</label>
             <Input
               type="text"
               value={inputMoreInfoValue}
               onChange={(e) => setInputMoreInfoValue(e.target.value)}
               placeholder="Insert a value"
-              className="border border-gray-300 rounded-lg p-2"
+              className="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
             />
           </div>
         </div>
-        <div className="text-center mt-4">
-          <Button onClick={handleEdit} className="bg-slate-50 text-slate-950">
+        <div className="text-center mt-6">
+          <Button onClick={handleEdit} className="bg-slate-50 border border-slate-50 font-bold text-slate-950 hover:bg-transparent hover:text-slate-50">
             Edit Shipping Info
           </Button>
         </div>
@@ -288,3 +286,4 @@ const EditShippingInfo = ({
 };
 
 export default EditShippingInfo;
+
