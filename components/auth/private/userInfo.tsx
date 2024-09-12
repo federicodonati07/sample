@@ -1,15 +1,30 @@
+// components/UserInfo.js
 import React, { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import supabase from '@/lib/supabase/supabaseClient';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ProfileOrder from './dashboard/orderSection/profileOrderSection/profileOrder';
+
+interface Order {
+  id: number;
+  created_at: string;
+  order_uuid: string;
+  profile_uuid: string;
+  profile_email: string;
+  order_status: string;
+  price: number;
+  product_uuid: string;
+}
 
 const UserInfo = ({ name, surname, email, role, orders, uuid }) => {
   const [inputNameValue, setInputNameValue] = useState(name || '');
   const [inputSurnameValue, setInputSurnameValue] = useState(surname || '');
   const [cancelledCount, setCancelledCount] = useState("0");
   const [archivedCount, setArchivedCount] = useState("0");
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [profileOrders, setProfileOrders] = useState<Order[]>([]);
 
   const handleEdit = async () => {
     if (inputNameValue !== '' || inputSurnameValue !== '') {
@@ -61,6 +76,47 @@ const UserInfo = ({ name, surname, email, role, orders, uuid }) => {
     }
   };
 
+  const handleProfileOrders = async (uuid: string, type: string) => {
+    // Query orders based on the type
+    if(type == "normal"){
+      const { data, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("profile_uuid", uuid)
+      .in("order_status", ['unread', 'processing', 'shipped', 'delivered']);
+
+      console.log(">> ", data, error)
+      
+      if (data!.length > 0) {
+        setProfileOrders(data!); // Update the orders state
+        setIsSheetOpen(true); // Open the sheet if there are orders
+      } else {
+        setProfileOrders([]); // Ensure profileOrders is empty if no data
+        setIsSheetOpen(false); // Close the sheet if there are no orders
+      }
+    }else{
+      const { data, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("profile_uuid", uuid)
+      .in("order_status", [type]);
+
+      console.log(">> ", data, error)
+      
+      if (data!.length > 0) {
+        setProfileOrders(data!); // Update the orders state
+        setIsSheetOpen(true); // Open the sheet if there are orders
+      } else {
+        setProfileOrders([]); // Ensure profileOrders is empty if no data
+        setIsSheetOpen(false); // Close the sheet if there are no orders
+      }
+    }
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    setIsSheetOpen(open);
+  };
+
   useEffect(() => {
     const fetchOrderCounts = async () => {
       const cancelledPromise = supabase
@@ -78,7 +134,7 @@ const UserInfo = ({ name, surname, email, role, orders, uuid }) => {
       try {
         const [cancelledResult, archivedResult] = await Promise.all([cancelledPromise, archivedPromise]);
 
-        console.log(cancelledResult, archivedResult)
+        console.log(cancelledResult, archivedResult);
 
         const cancelledCount = cancelledResult.data?.length || 0;
         const archivedCount = archivedResult.data?.length || 0;
@@ -138,20 +194,26 @@ const UserInfo = ({ name, surname, email, role, orders, uuid }) => {
             <span className="text-lg font-medium text-gray-300">Role:</span> <span className={`font-semibold ${role === 'admin' ? 'text-teal-400' : role === 'veteran' ? 'text-violet-400' : role === 'member' ? 'text-green-400' : role === 'banned' ? 'text-red-400' : 'text-gray-400'}`}>{role}</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className={`transition-all ease-in duration-200 flex items-center justify-between opacity-75 p-4 border border-yellow-400 text-yellow-200 bg-yellow-600 hover:bg-yellow-700 hover:opacity-100 rounded-lg ${parseInt(orders) == 0 ? "cursor-default" : "cursor-pointer"}`}>
+            <div onClick={() => handleProfileOrders(uuid, "normal")} className={`transition-all ease-in duration-200 flex items-center justify-between opacity-75 p-4 border border-yellow-400 text-yellow-200 bg-yellow-600 hover:bg-yellow-700 hover:opacity-100 rounded-lg ${parseInt(orders) == 0 ? "cursor-default" : "cursor-pointer"}`}>
               <span className="text-lg font-medium">Pending Orders:</span>
               <span className="font-bold text-2xl px-4 py-2">{orders}</span>
             </div>
-            <div className={`transition-all ease-in duration-200 flex items-center justify-between opacity-75 p-4 border border-red-400 text-red-200 bg-red-600 hover:bg-red-700 hover:opacity-100 rounded-lg ${parseInt(cancelledCount) == 0 ? "cursor-default" : "cursor-pointer"}`}>
+            <div onClick={() => handleProfileOrders(uuid, "cancelled")} className={`transition-all ease-in duration-200 flex items-center justify-between opacity-75 p-4 border border-red-400 text-red-200 bg-red-600 hover:bg-red-700 hover:opacity-100 rounded-lg ${parseInt(cancelledCount) == 0 ? "cursor-default" : "cursor-pointer"}`}>
               <span className="text-xl font-medium">Cancelled Orders:</span>
               <span className="font-bold text-2xl px-4 py-2">{cancelledCount}</span>
             </div>
-            <div className={`transition-all ease-in duration-200 flex items-center justify-between opacity-75 p-4 border border-gray-400 text-gray-200 bg-gray-600 hover:bg-gray-700 hover:opacity-100 rounded-lg ${parseInt(archivedCount) == 0 ? "cursor-default" : "cursor-pointer"}`}>
+            <div onClick={() => handleProfileOrders(uuid, "archived")} className={`transition-all ease-in duration-200 flex items-center justify-between opacity-75 p-4 border border-gray-400 text-gray-200 bg-gray-600 hover:bg-gray-700 hover:opacity-100 rounded-lg ${parseInt(archivedCount) == 0 ? "cursor-default" : "cursor-pointer"}`}>
               <span className="text-lg font-medium text-gray-300">Archived Orders:</span>
               <span className="font-bold text-2xl px-4 py-2">{archivedCount}</span>
             </div>
           </div>
         </div>
+        <ProfileOrder 
+          open={isSheetOpen}
+          onOpenChange={handleOpenChange}
+          uuid={uuid}
+          orders={profileOrders}
+        />
       </div>
       <ToastContainer />
     </>

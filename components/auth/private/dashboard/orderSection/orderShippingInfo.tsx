@@ -21,7 +21,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import { Country, State } from 'country-state-city';
 import ReactCountryFlag from "react-country-flag";
 
-const OrderShippingInfo = ({ open, onOpenChange, email, country, state, city, address, houseNumber, apartamentNumber, postalCode, phoneNumber, moreInfo }) => {
+const OrderShippingInfo = ({ open, onOpenChange, email, country, state, city, address, houseNumber, apartmentNumber, postalCode, phoneNumber, moreInfo }) => {
     const [countryName, setCountryName] = useState('');
     const [stateName, setStateName] = useState('');
 
@@ -69,7 +69,7 @@ const OrderShippingInfo = ({ open, onOpenChange, email, country, state, city, ad
                         </span>
                         <span className='flex flex-row space-x-2 items-center'>
                             <FaHouseFlag className='text-4xl font-black' />
-                            <span>{apartamentNumber}</span>
+                            <span>{apartmentNumber}</span>
                         </span>
                         <span className='flex flex-row space-x-2 items-center'>
                             <MdEmail className='text-4xl font-black' />
