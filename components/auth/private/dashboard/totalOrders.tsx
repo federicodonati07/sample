@@ -1,18 +1,11 @@
 import supabase from '@/lib/supabase/supabaseClient';
-import React, { useEffect, useState } from 'react';
-import OrderShippingInfo from './orderSection/orderShippingInfo';
+import { useEffect, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { FaBox, FaCalendarAlt, FaExternalLinkAlt } from "react-icons/fa";
-import { IoPricetags } from "react-icons/io5";
-import { MdAlternateEmail } from "react-icons/md";
 import { Button } from '@/components/ui/button';
-import { FiArchive } from "react-icons/fi";
-import { RiArchiveStackLine } from "react-icons/ri";
-import { HiMiniArchiveBoxXMark } from "react-icons/hi2"; // Import for the unarchive icon
 import { ToastContainer, toast } from 'react-toastify';
-import { CgRemoveR } from "react-icons/cg";
-import { RiInboxArchiveLine } from "react-icons/ri";
+import { FaSearch, FaFilter, FaArchive } from 'react-icons/fa';
+import { HiMiniArchiveBoxXMark } from "react-icons/hi2";
 
 interface Order {
     id: number;
@@ -32,28 +25,19 @@ const orderStatusColors = {
     shipped: 'bg-green-500 text-white',
     delivered: 'bg-violet-500 text-white',
     canceled: 'bg-red-500 text-white',
+    archived: 'bg-gray-600 text-white',
 };
 
 const TotalOrders = () => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
-    const [country, setCountry] = useState('');
-    const [state, setState] = useState('');
-    const [city, setCity] = useState('');
-    const [address, setAddress] = useState('');
-    const [houseNumber, setHouseNumber] = useState('');
-    const [apartmentNumber, setApartmentNumber] = useState('');
-    const [postalCode, setPostalCode] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [moreInfo, setMoreInfo] = useState('');
-
+    const [archivedOrders, setArchivedOrders] = useState<Order[]>([]);
     const [sortKey, setSortKey] = useState('created_at');
     const [sortOrder, setSortOrder] = useState('asc');
     const [statusFilter, setStatusFilter] = useState('');
     const [dateFilter, setDateFilter] = useState('newest');
     const [searchQuery, setSearchQuery] = useState('');
     const [showArchived, setShowArchived] = useState<boolean>(() => {
-        // Read from localStorage or default to false
         const storedValue = localStorage.getItem('showArchived');
         return storedValue === 'true' || false;
     });
@@ -65,23 +49,13 @@ const TotalOrders = () => {
 
     const handleDrawer = async (uuid: string) => {
         setIsDrawerOpen(true);
-
         const { data } = await supabase
             .from('shipping_info')
             .select('*')
             .eq('profile_uuid', uuid)
             .single();
-
         if (data) {
-            setCountry(data.country);
-            setState(data.state);
-            setCity(data.city);
-            setAddress(data.address);
-            setHouseNumber(data.house_number);
-            setApartmentNumber(data.apartment_number);
-            setPostalCode(data.postal_code);
-            setPhoneNumber(data.phone_number);
-            setMoreInfo(data.more_info);
+            // Set shipping details here
         }
     };
 
@@ -89,276 +63,268 @@ const TotalOrders = () => {
         setIsDrawerOpen(open);
     };
 
+    const fetchOrders = async () => {
+        const { data: activeOrders } = await supabase
+            .from('orders')
+            .select('*')
+            .in("order_status", ['unread', 'processing', 'shipped', 'delivered', 'canceled']);
+        const { data: archivedOrders } = await supabase
+            .from('orders')
+            .select('*')
+            .eq("order_status", 'archived');
+
+        if (activeOrders) setOrders(activeOrders as Order[]);
+        if (archivedOrders) setArchivedOrders(archivedOrders as Order[]);
+    };
+
     useEffect(() => {
-        const fetchAllOrders = async () => {
-            const { data } = await supabase
-                .from('orders')
-                .select('*')
-                .in("order_status", ['unread', 'processing', 'shipped', 'delivered', 'canceled'])
-
-            if (data) {
-                setOrders(data as Order[]);
-            }
-        };
-
-        fetchAllOrders();
+        fetchOrders();
     }, []);
 
     useEffect(() => {
-        if (dateFilter === 'newest') {
-            setSortOrder('desc');
-        } else {
-            setSortOrder('asc');
-        }
+        setSortOrder(dateFilter === 'newest' ? 'desc' : 'asc');
     }, [dateFilter]);
 
     useEffect(() => {
-        // Save to localStorage whenever showArchived changes
         localStorage.setItem('showArchived', JSON.stringify(showArchived));
     }, [showArchived]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const query = e.target.value.toLowerCase();
-        setSearchQuery(query);
-        setSortKey('order_uuid'); // Default sortKey for UUID
+        setSearchQuery(e.target.value.toLowerCase());
+        setSortKey('order_uuid');
     };
 
-    const filteredOrders = orders
-        .filter((order) =>
-            (statusFilter ? order.order_status === statusFilter : true) &&
-            (searchQuery ? 
-                order.order_uuid.toLowerCase().includes(searchQuery) ||
-                order.profile_email.toLowerCase().includes(searchQuery) 
-                : true) &&
-            (!order.is_archived || showArchived)  // Mostra archiviati solo se showArchived è true
-        );
+    const filteredOrders = orders.filter(order =>
+        (statusFilter ? order.order_status === statusFilter : true) &&
+        (searchQuery ?
+            order.order_uuid.toLowerCase().includes(searchQuery) ||
+            order.profile_email.toLowerCase().includes(searchQuery)
+            : true)
+    );
 
-    const sortedAndFilteredOrders = filteredOrders
-        .sort((a, b) => {
-            if (sortKey === 'created_at') {
-                const dateA = new Date(a[sortKey]);
-                const dateB = new Date(b[sortKey]);
+    const filteredArchivedOrders = archivedOrders.filter(order =>
+        (searchQuery ?
+            order.order_uuid.toLowerCase().includes(searchQuery) ||
+            order.profile_email.toLowerCase().includes(searchQuery)
+            : true)
+    );
 
-                if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
-                    return 0;
-                }
-
-                return sortOrder === 'desc'
-                    ? dateB.getTime() - dateA.getTime()
-                    : dateA.getTime() - dateB.getTime();
-            }
-
-            const compare = String(a[sortKey]).localeCompare(String(b[sortKey]));
-            return sortOrder === 'asc' ? compare : -compare;
-        });
-
-    const handleReadOrder = async (order_uuid: string) => {
-        try {
-            const { data, error } = await supabase
-                .from("orders")
-                .update({ order_status: "processing" })
-                .eq("order_uuid", order_uuid);
-
-            if (error) throw error;
-
-            setOrders(prevOrders => 
-                prevOrders.map(order => 
-                    order.order_uuid === order_uuid ? { ...order, order_status: "processing" } : order
-                )
-            );
-
-            toast.success(`Successfully updated the order status\nOrder UUID: ${order_uuid}`);
-        } catch (error) {
-            toast.error("Error: Unable to update order status");
+    const sortedOrders = filteredOrders.sort((a, b) => {
+        if (sortKey === 'created_at') {
+            const dateA = new Date(a[sortKey]);
+            const dateB = new Date(b[sortKey]);
+            return sortOrder === 'desc'
+                ? dateB.getTime() - dateA.getTime()
+                : dateA.getTime() - dateB.getTime();
         }
-    };
+        return sortOrder === 'asc'
+            ? String(a[sortKey]).localeCompare(String(b[sortKey]))
+            : String(b[sortKey]).localeCompare(String(a[sortKey]));
+    });
+
+    const sortedArchivedOrders = filteredArchivedOrders.sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return sortOrder === 'desc'
+            ? dateB.getTime() - dateA.getTime()
+            : dateA.getTime() - dateB.getTime();
+    });
 
     const handleArchiveOrder = async (order_uuid: string) => {
         try {
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from("orders")
                 .update({ order_status: "archived" })
                 .eq("order_uuid", order_uuid);
 
             if (error) throw error;
-
-            setOrders(prevOrders =>
-                prevOrders.map(order =>
-                    order.order_uuid === order_uuid ? { ...order, is_archived: true } : order
-                )
-            );
-
-            toast.success(`Successfully archived the order\nOrder UUID: ${order_uuid}`);
+            fetchOrders();
+            toast.success(`Order archived: ${order_uuid}`);
         } catch (error) {
-            toast.error("Error: Unable to archive the order");
+            toast.error("Error archiving order");
         }
     };
 
     const handleUnarchiveOrder = async (order_uuid: string) => {
         try {
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from("orders")
                 .update({ order_status: "processing" })
                 .eq("order_uuid", order_uuid);
 
             if (error) throw error;
-
-            setOrders(prevOrders =>
-                prevOrders.map(order =>
-                    order.order_uuid === order_uuid ? { ...order, is_archived: false } : order
-                )
-            );
-
-            toast.success(`Successfully unarchived the order\nOrder UUID: ${order_uuid}`);
+            fetchOrders();
+            toast.success(`Order unarchived: ${order_uuid}`);
         } catch (error) {
-            toast.error("Error: Unable to unarchive the order");
-        }
-    };
-
-    const handleCancelOrder = async (order_uuid: string) => {
-        try {
-            const { data, error } = await supabase
-                .from("orders")
-                .update({ order_status: "canceled" })
-                .eq("order_uuid", order_uuid);
-
-            if (error) throw error;
-
-            setOrders(prevOrders =>
-                prevOrders.map(order =>
-                    order.order_uuid === order_uuid ? { ...order, order_status: "canceled" } : order
-                )
-            );
-
-            toast.success(`Successfully canceled the order\nOrder UUID: ${order_uuid}`);
-        } catch (error) {
-            toast.error("Error: Unable to cancel the order");
+            toast.error("Error unarchiving order");
         }
     };
 
     return (
         <div className='flex flex-col justify-center items-center mt-5 px-4'>
             <div className='w-full max-w-6xl mb-4'>
-                <div className='flex flex-col md:flex-row justify-between mb-4'>
-                    <div className='flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-2'>
-                        <input
-                            type='text'
-                            placeholder='Search by UUID or Email'
-                            className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white flex-1'
-                            onChange={handleSearchChange}
-                        />
-                        <select
-                            className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white flex-1 md:flex-none'
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                        >
-                            <option value=''>All Statuses</option>
-                            <option value='unread'>Unread</option>
-                            <option value='processing'>Processing</option>
-                            <option value='shipped'>Shipped</option>
-                            <option value='delivered'>Delivered</option>
-                            <option value='canceled'>Canceled</option>
-                        </select>
-                    </div>
-                    <div className='flex space-x-2'>
-                        <Button onClick={() => setDateFilter('newest')} variant='secondary'>Newest</Button>
-                        <Button onClick={() => setDateFilter('oldest')} variant='secondary'>Oldest</Button>
+                <div className='flex flex-col md:flex-row items-start mb-4'>
+                    <input
+                        type='text'
+                        placeholder='Search by UUID or Email'
+                        className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white'
+                        onChange={handleSearchChange}
+                    />
+                    <select
+                        className='p-2 border border-gray-600 rounded-lg bg-gray-800 text-white ml-2'
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value=''>All Statuses</option>
+                        <option value='unread'>Unread</option>
+                        <option value='processing'>Processing</option>
+                        <option value='shipped'>Shipped</option>
+                        <option value='delivered'>Delivered</option>
+                        <option value='canceled'>Canceled</option>
+                    </select>
+                    <div className='flex space-x-2 ml-2'>
+                        <Button onClick={() => setDateFilter('newest')} variant='secondary'>
+                            <FaSearch className='mr-1' /> Newest
+                        </Button>
+                        <Button onClick={() => setDateFilter('oldest')} variant='secondary'>
+                            <FaSearch className='mr-1' /> Oldest
+                        </Button>
                         <Button onClick={() => setShowArchived(!showArchived)} variant={showArchived ? 'default' : 'secondary'}>
-                            {showArchived ? 'Hide Archived' : 'Show Archived'}
+                            {showArchived ? 'Show Active' : 'Show Archived'}
                         </Button>
                     </div>
                 </div>
             </div>
 
             <div className='w-full max-w-6xl'>
-                {sortedAndFilteredOrders.map((order) => (
-                    <div
-                        key={order.id}
-                        className={`flex flex-col border border-gray-700 rounded-xl bg-gray-800 text-white p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 mb-4 ${order.order_status == "archived" ? 'filter grayscale' : ''}`}
-                    >
-                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
-                            <div className="flex items-center">
-                                <FaBox className="text-3xl text-yellow-400 mr-3" />
-                                <span className={`font-bold text-xl text-orange-500 ${order.order_status === "unread" ? "blur-sm disabled" : "blur-none"}`}>{order.order_uuid}</span>
-                                <div className="ml-4">
-                                    {order.order_status == "unread" ? (
-                                        <div onClick={() => handleReadOrder(order.order_uuid)} className={`flex items-center space-x-2 p-2 cursor-pointer rounded-full ${orderStatusColors[order.order_status]} shadow-md`}>
-                                            <span className="text-md font-black capitalize">{order.order_status}</span>
-                                        </div>
-                                    ) : (
-                                        <div className={`flex items-center space-x-2 p-2 rounded-full ${orderStatusColors[order.order_status]} shadow-md`}>
-                                            <span className="text-md font-black capitalize">{order.order_status}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                {showArchived ? (
+                    sortedArchivedOrders.map((order) => (
+                        <OrderCard key={order.id} order={order} onUnarchive={handleUnarchiveOrder} fetchOrders={fetchOrders} />
+                    ))
+                ) : (
+                    sortedOrders.map((order) => (
+                        <OrderCard key={order.id} order={order} onArchive={handleArchiveOrder} fetchOrders={fetchOrders} />
+                    ))
+                )}
+            </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex flex-col">
-                                <div className="flex flex-col">
-                                    <div className="flex items-center mb-2">
-                                        <MdAlternateEmail className="text-2xl text-teal-400 mr-2" />
-                                        {order.order_status == "unread" ? (
-                                            <div className="flex flex-row blur-sm">
-                                                <span className="font-medium text-teal-400">{order.profile_email}</span>
-                                                <FaExternalLinkAlt className="text-teal-400 ml-2" />
-                                            </div>
-                                        ) : (
-                                            <div onClick={() => handleDrawer(order.profile_uuid)} className="flex flex-row cursor-pointer decoration-teal-400 hover:underline blur-none">
-                                                <span className="font-medium text-teal-400">{order.profile_email}</span>
-                                                <FaExternalLinkAlt className="text-teal-400 ml-2" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="flex items-center mb-2">
-                                    <FaCalendarAlt className="text-2xl text-blue-400 mr-2" />
-                                    <span className={`font-medium ${order.order_status === "unread" ? "blur-sm disabled" : "blur-none"}`}>{formatDateTime(order.created_at)}</span>
-                                </div>
-                                <div className="flex items-center mb-2">
-                                    <IoPricetags className="text-2xl text-orange-400 mr-2" />
-                                    <span className={`font-medium text-yellow-400 ${order.order_status === "unread" ? "blur-sm disabled" : "blur-none"}`}>{order.price.toFixed(2)} €</span>
-                                </div>
-                                {order.order_status == "unread" ? "" : (
-                                    <>
-                                        {order.order_status == "archived" ? (
-                                            <div className="flex items-center mb-2">
-                                                <HiMiniArchiveBoxXMark className="text-2xl text-gray-600 mr-2" />
-                                                <span onClick={() => handleUnarchiveOrder(order.order_uuid)} className="font-medium cursor-pointer hover:underline text-gray-400">Unarchive Order</span>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center mb-2">
-                                                <RiInboxArchiveLine className="text-2xl text-gray-600 mr-2" />
-                                                <span onClick={() => handleArchiveOrder(order.order_uuid)} className="font-medium cursor-pointer hover:underline text-gray-400">Archive Order</span>
-                                            </div>
-                                        )}
+            <ToastContainer />
+        </div>
+    );
+};
 
-                                        <div className="flex items-center mb-2">
-                                            <CgRemoveR className="text-2xl text-red-600 mr-2" />
-                                            <span onClick={() => handleCancelOrder(order.order_uuid)} className="font-medium cursor-pointer hover:underline text-red-400">Cancel Order</span>
-                                        </div>
-                                    </>
-                                )}
-                                
-                            </div>
-                        </div>
-                        <OrderShippingInfo
-                            open={isDrawerOpen}
-                            onOpenChange={handleOpenChange}
-                            email={order.profile_email}
-                            country={country}
-                            state={state}
-                            city={city}
-                            address={address}
-                            houseNumber={houseNumber}
-                            apartmentNumber={apartmentNumber}
-                            postalCode={postalCode}
-                            phoneNumber={phoneNumber}
-                            moreInfo={moreInfo} 
-                        />
+
+import React from 'react';
+import { FaArrowLeft, FaArrowRight, FaTimes } from 'react-icons/fa';
+
+const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders }: { order: Order, onArchive?: (uuid: string) => void, onUnarchive?: (uuid: string) => void, fetchOrders: () => Promise<void> }) => {
+    const formatDateTime = (dateString: string) => {
+        const date = parseISO(dateString);
+        return format(date, "d MMMM yyyy - HH:mm", { locale: it });
+    };
+
+    const updateOrderStatus = async (newStatus: string) => {
+        try {
+            const { error } = await supabase
+                .from('orders')
+                .update({ order_status: newStatus })
+                .eq('order_uuid', order.order_uuid);
+
+            if (error) throw error;
+            toast.success(`Order status updated to ${newStatus}`);
+            await fetchOrders(); // Refresh orders to update the UI
+        } catch (error) {
+            toast.error("Error updating order status");
+        }
+    };
+
+    const handleNextState = () => {
+        const nextState = order.order_status === 'processing' ? 'shipped' :
+                          order.order_status === 'shipped' ? 'delivered' : 'delivered';
+        updateOrderStatus(nextState);
+    };
+
+    const handlePrevState = () => {
+        const prevState = order.order_status === 'delivered' ? 'shipped' :
+                          order.order_status === 'shipped' ? 'processing' : 'processing';
+        updateOrderStatus(prevState);
+    };
+
+    const handleCancelOrder = () => {
+        updateOrderStatus('canceled');
+    };
+
+    const handleOrderClick = async () => {
+        if (order.order_status === 'unread') {
+            updateOrderStatus('processing');
+        }
+    };
+
+    return (
+        <div className="relative bg-gray-700 rounded-lg p-4 w-full h-full shadow-lg mb-4 overflow-auto">
+            {/* Overlay for unread orders */}
+            {order.order_status === 'unread' && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="transition-all ease-in duration-300 absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center cursor-pointer z-10 hover:opacity-25"
+                        onClick={handleOrderClick}>
+                        <span className="text-white text-lg font-bold">
+                            Click to Read
+                        </span>
                     </div>
-                    
-                ))}
+                    <div className="absolute inset-0 blur-sm"></div>
+                </div>
+            )}
+            <div className={`relative ${order.order_status === 'unread' ? 'blur-sm' : ''}`}>
+                <div className='flex justify-between'>
+                    <div className='text-lg text-white'>
+                        Order UUID: <span className='text-violet-400'>{order.order_uuid}</span>
+                    </div>
+                    <div className={`px-2 py-1 rounded-full ${orderStatusColors[order.order_status]}`}>
+                        {order.order_status}
+                    </div>
+                </div>
+                <div className='text-sm text-gray-400'>
+                    {formatDateTime(order.created_at)}
+                </div>
+                <div className='text-sm text-gray-400'>
+                    <span className='text-teal-400'>{order.profile_email}</span>
+                </div>
+
+                {/* Next/Prev State and Cancel buttons */}
+                
+
+                
+
+                <div className='flex justify-end mt-2'>
+                    {order.order_status === 'archived' ? (
+                        <Button onClick={() => onUnarchive?.(order.order_uuid)} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
+                            <HiMiniArchiveBoxXMark className='inline mr-2' /> Unarchive
+                        </Button>
+                    ) : (
+                        <>
+                            <div className='flex flex-rows justify-center items-center space-x-2'>
+                                <div className={`flex justify-start items-start ${order.order_status === "canceled" ? "hidden" : ""}`}>
+                                    <Button onClick={handleCancelOrder} className='text-slate-50 bg-red-600 font-bold border border-red-600 rounded-lg hover:bg-transparent hover:text-slate-50'>
+                                        <FaTimes className='inline mr-2' />Cancel Order
+                                    </Button>
+                                </div>
+                                <div className={`flex justify-center items-center space-x-2 ${order.order_status === "canceled" ? "hidden" : ""}`}>
+                                    <Button onClick={handlePrevState} disabled={order.order_status === 'processing'} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
+                                        <FaArrowLeft/>
+                                    </Button>
+                                    
+                                    <Button onClick={handleNextState} disabled={order.order_status === 'delivered'} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
+                                        <FaArrowRight/>
+                                    </Button>
+                                </div>
+                                <div className='flex justify-end items-end'>
+                                    <Button onClick={() => onArchive?.(order.order_uuid)} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
+                                        <FaArchive className='inline mr-2' />Archive
+                                    </Button>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );
