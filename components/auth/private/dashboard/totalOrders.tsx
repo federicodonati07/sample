@@ -149,7 +149,7 @@ const TotalOrders = () => {
         try {
             const { error } = await supabase
                 .from("orders")
-                .update({ order_status: "processing" })
+                .update({ order_status: "delivered" })
                 .eq("order_uuid", order_uuid);
 
             if (error) throw error;
@@ -260,7 +260,7 @@ const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders }: { order: Orde
     };
 
     return (
-        <div className="relative bg-gray-700 rounded-lg p-4 w-full h-full shadow-lg mb-4 overflow-auto">
+        <div className={`relative bg-gray-700 rounded-lg p-4 w-full h-full shadow-lg mb-4 overflow-auto ${order.order_status === "archived" ? "grayscale" : ""}`}>
             {/* Overlay for unread orders */}
             {order.order_status === 'unread' && (
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -282,27 +282,37 @@ const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders }: { order: Orde
                         {order.order_status}
                     </div>
                 </div>
-                <div className='text-sm text-gray-400'>
-                    {formatDateTime(order.created_at)}
+                <div className='flex flex-rows justify-between mt-2 mb-2'>
+                    <div>
+                        <div className='text-sm text-gray-400'>
+                            {formatDateTime(order.created_at)}
+                        </div>
+                        <div className='text-sm text-gray-400 cursor-pointer'>
+                            <span className='text-teal-400'>{order.profile_email}</span>
+                        </div>
+                    </div>
+                    
+                    <div className='text-slate-50 text-xl font-bold ml-5'>
+                        {order.price} €
+                    </div>
                 </div>
-                <div className='text-sm text-gray-400'>
-                    <span className='text-teal-400'>{order.profile_email}</span>
-                </div>
+                
+                
 
                 {/* Next/Prev State and Cancel buttons */}
                 
 
                 
 
-                <div className='flex justify-end mt-2'>
+                <div className='flex justify-center'>
                     {order.order_status === 'archived' ? (
                         <Button onClick={() => onUnarchive?.(order.order_uuid)} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
                             <HiMiniArchiveBoxXMark className='inline mr-2' /> Unarchive
                         </Button>
                     ) : (
                         <>
-                            <div className='flex flex-rows justify-center items-center space-x-2'>
-                                <div className={`flex justify-start items-start ${order.order_status === "canceled" ? "hidden" : ""}`}>
+                            <div className='flex flex-row space-x-10 mt-2'>
+                                <div className={`flex justify-center items-center ${order.order_status === "canceled" ? "hidden" : ""}`}>
                                     <Button onClick={handleCancelOrder} className='text-slate-50 bg-red-600 font-bold border border-red-600 rounded-lg hover:bg-transparent hover:text-slate-50'>
                                         <FaTimes className='inline mr-2' />Cancel Order
                                     </Button>
@@ -311,15 +321,22 @@ const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders }: { order: Orde
                                     <Button onClick={handlePrevState} disabled={order.order_status === 'processing'} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
                                         <FaArrowLeft/>
                                     </Button>
-                                    
-                                    <Button onClick={handleNextState} disabled={order.order_status === 'delivered'} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
-                                        <FaArrowRight/>
-                                    </Button>
-                                </div>
-                                <div className='flex justify-end items-end'>
-                                    <Button onClick={() => onArchive?.(order.order_uuid)} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
-                                        <FaArchive className='inline mr-2' />Archive
-                                    </Button>
+                                    {order.order_status === "delivered" ? (
+                                        <></>
+                                    ):(
+                                       <Button onClick={handleNextState} disabled={order.order_status === 'delivered'} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
+                                            <FaArrowRight/>
+                                        </Button> 
+                                    )}
+                                    {order.order_status === "delivered" ? (
+                                        <div className='flex justify-end items-end'>
+                                            <Button onClick={() => onArchive?.(order.order_uuid)} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
+                                                <FaArchive className='inline mr-2' />Archive
+                                            </Button>
+                                        </div>
+                                    ):(
+                                        <></>
+                                    )}
                                 </div>
                             </div>
                         </>
