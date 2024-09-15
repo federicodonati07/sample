@@ -39,7 +39,7 @@ const EditShippingInfo = ({
   const [inputCityValue, setInputCityValue] = useState<string>(city || 'unassigned');
   const [inputAddressValue, setInputAddressValue] = useState<string>(address || '');
   const [inputHouseNumberValue, setInputHouseNumberValue] = useState<string>(house_number || '');
-  const [inputApartamentNumberValue, setInputApartamentNumberValue] = useState<string>(apartament_number || '');
+  const [inputApartmentNumberValue, setInputApartmentNumberValue] = useState<string>(apartament_number || '');
   const [inputPostalCodeValue, setInputPostalCodeValue] = useState<string>(postal_code || '');
   const [inputPhoneNumberValue, setInputPhoneNumberValue] = useState<string>(phone_number || '');
   const [inputMoreInfoValue, setInputMoreInfoValue] = useState<string>(more_info || '');
@@ -83,7 +83,7 @@ const EditShippingInfo = ({
     if (
       inputAddressValue !== '' &&
       inputHouseNumberValue !== '' &&
-      inputApartamentNumberValue !== '' &&
+      inputApartmentNumberValue !== '' &&
       inputPostalCodeValue !== '' &&
       inputPhoneNumberValue !== '' &&
       inputCountryValue !== 'unassigned' &&
@@ -105,7 +105,7 @@ const EditShippingInfo = ({
               city: inputCityValue,
               address: inputAddressValue,
               house_number: inputHouseNumberValue,
-              apartament_number: inputApartamentNumberValue,
+              apartment_number: inputApartmentNumberValue,
               postal_code: inputPostalCodeValue,
               phone_number: inputPhoneNumberValue,
               more_info: inputMoreInfoValue,
@@ -129,7 +129,7 @@ const EditShippingInfo = ({
   useEffect(() => {
     setInputAddressValue(address || '');
     setInputHouseNumberValue(house_number || '');
-    setInputApartamentNumberValue(apartament_number || '');
+    setInputApartmentNumberValue(apartament_number || '');
     setInputPostalCodeValue(postal_code || '');
     setInputPhoneNumberValue(phone_number || '');
     setInputMoreInfoValue(more_info || '');
@@ -228,8 +228,8 @@ const EditShippingInfo = ({
               <label className="text-lg font-semibold mb-1 text-gray-300">Apartament N.:</label>
               <Input
                 type="text"
-                value={inputApartamentNumberValue}
-                onChange={(e) => setInputApartamentNumberValue(e.target.value)}
+                value={inputApartmentNumberValue}
+                onChange={(e) => setInputApartmentNumberValue(e.target.value)}
                 placeholder="Insert a value"
                 className="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
               />

@@ -4,8 +4,14 @@ import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { ToastContainer, toast } from 'react-toastify';
-import { FaSearch, FaFilter, FaArchive } from 'react-icons/fa';
+import { FaSearch, FaArchive } from 'react-icons/fa';
 import { HiMiniArchiveBoxXMark } from "react-icons/hi2";
+import OrderShippingInfo from './orderSection/orderShippingInfo';
+import Link from 'next/link';
+import { IoMdInformationCircleOutline } from "react-icons/io";
+import { IoMdTime } from "react-icons/io";
+import { TbShoppingBagSearch } from "react-icons/tb";
+import { FaTags } from "react-icons/fa6";
 
 interface Order {
     id: number;
@@ -24,12 +30,11 @@ const orderStatusColors = {
     processing: 'bg-blue-500 text-white',
     shipped: 'bg-green-500 text-white',
     delivered: 'bg-violet-500 text-white',
-    canceled: 'bg-red-500 text-white',
+    cancelled: 'bg-red-500 text-white',
     archived: 'bg-gray-600 text-white',
 };
 
 const TotalOrders = () => {
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
     const [archivedOrders, setArchivedOrders] = useState<Order[]>([]);
     const [sortKey, setSortKey] = useState('created_at');
@@ -42,32 +47,11 @@ const TotalOrders = () => {
         return storedValue === 'true' || false;
     });
 
-    const formatDateTime = (dateString: string) => {
-        const date = parseISO(dateString);
-        return format(date, "d MMMM yyyy - HH:mm", { locale: it });
-    };
-
-    const handleDrawer = async (uuid: string) => {
-        setIsDrawerOpen(true);
-        const { data } = await supabase
-            .from('shipping_info')
-            .select('*')
-            .eq('profile_uuid', uuid)
-            .single();
-        if (data) {
-            // Set shipping details here
-        }
-    };
-
-    const handleOpenChange = (open: boolean) => {
-        setIsDrawerOpen(open);
-    };
-
     const fetchOrders = async () => {
         const { data: activeOrders } = await supabase
             .from('orders')
             .select('*')
-            .in("order_status", ['unread', 'processing', 'shipped', 'delivered', 'canceled']);
+            .in("order_status", ['unread', 'processing', 'shipped', 'delivered', 'cancelled']);
         const { data: archivedOrders } = await supabase
             .from('orders')
             .select('*')
@@ -179,7 +163,7 @@ const TotalOrders = () => {
                         <option value='processing'>Processing</option>
                         <option value='shipped'>Shipped</option>
                         <option value='delivered'>Delivered</option>
-                        <option value='canceled'>Canceled</option>
+                        <option value='cancelled'>Cancelled</option>
                     </select>
                     <div className='flex space-x-2 ml-2'>
                         <Button onClick={() => setDateFilter('newest')} variant='secondary'>
@@ -198,11 +182,11 @@ const TotalOrders = () => {
             <div className='w-full max-w-6xl'>
                 {showArchived ? (
                     sortedArchivedOrders.map((order) => (
-                        <OrderCard key={order.id} order={order} onUnarchive={handleUnarchiveOrder} fetchOrders={fetchOrders} />
+                        <OrderCard key={order.id} order={order} onUnarchive={handleUnarchiveOrder} fetchOrders={fetchOrders} profile_uuid={order.profile_uuid}/>
                     ))
                 ) : (
                     sortedOrders.map((order) => (
-                        <OrderCard key={order.id} order={order} onArchive={handleArchiveOrder} fetchOrders={fetchOrders} />
+                        <OrderCard key={order.id} order={order} onArchive={handleArchiveOrder} fetchOrders={fetchOrders} profile_uuid={order.profile_uuid}/>
                     ))
                 )}
             </div>
@@ -216,7 +200,44 @@ const TotalOrders = () => {
 import React from 'react';
 import { FaArrowLeft, FaArrowRight, FaTimes } from 'react-icons/fa';
 
-const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders }: { order: Order, onArchive?: (uuid: string) => void, onUnarchive?: (uuid: string) => void, fetchOrders: () => Promise<void> }) => {
+const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders, profile_uuid }: { order: Order, onArchive?: (uuid: string) => void, onUnarchive?: (uuid: string) => void, fetchOrders: () => Promise<void>, profile_uuid:string}) => {
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [country, setCountry] = useState('');
+    const [state, setState] = useState('');
+    const [city, setCity] = useState('');
+    const [address, setAddress] = useState('');
+    const [houseNumber, setHouseNumber] = useState('');
+    const [apartmentNumber, setApartmentNumber] = useState('');
+    const [postalCode, setPostalCode] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [moreInfo, setMoreInfo] = useState('');
+
+
+    const handleDrawer = async (uuid: string) => {
+        setIsDrawerOpen(true);
+        const { data } = await supabase
+            .from('shipping_info')
+            .select('*')
+            .eq('profile_uuid', profile_uuid)
+            .single();
+        if (data) {
+            setCountry(data.country);
+            setState(data.state);
+            setCity(data.city);
+            setAddress(data.address);
+            setHouseNumber(data.house_number);
+            setApartmentNumber(data.apartament_number);
+            setApartmentNumber(data.apartment_number);
+            setPostalCode(data.postal_code);
+            setPhoneNumber(data.phone_number);
+            setMoreInfo(data.more_info);
+        }
+    };
+    const handleOpenChange = (open: boolean) => {
+        setIsDrawerOpen(open);
+    };
+
     const formatDateTime = (dateString: string) => {
         const date = parseISO(dateString);
         return format(date, "d MMMM yyyy - HH:mm", { locale: it });
@@ -250,7 +271,7 @@ const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders }: { order: Orde
     };
 
     const handleCancelOrder = () => {
-        updateOrderStatus('canceled');
+        updateOrderStatus('cancelled');
     };
 
     const handleOrderClick = async () => {
@@ -282,20 +303,33 @@ const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders }: { order: Orde
                         {order.order_status}
                     </div>
                 </div>
-                <div className='flex flex-rows justify-between mt-2 mb-2'>
+                <div className='flex flex-rows justify-between mt-2'>
                     <div>
-                        <div className='text-sm text-gray-400'>
+                        <div className='text-sm flex flex-rows font-bold text-gray-400'>
+                            <IoMdTime className='text-gray-400 text-xl font-bold mr-2'/>
                             {formatDateTime(order.created_at)}
                         </div>
-                        <div className='text-sm text-gray-400 cursor-pointer'>
-                            <span className='text-teal-400'>{order.profile_email}</span>
+                        <div className='text-sm flex flex-rows font-bold text-gray-400 cursor-pointer'
+                            onClick={()=>handleDrawer(profile_uuid)}>
+                                <IoMdInformationCircleOutline className='text-teal-400 text-xl font-bold mr-2'/>
+                                <span className='text-teal-400 hover:underline'>{order.profile_email}</span>
                         </div>
                     </div>
                     
-                    <div className='text-slate-50 text-xl font-bold ml-5'>
+                    <div className='flex flex-rows text-slate-950 bg-yellow-400 border border-yellow-400 rounded-full p-2 font-bold'>
+                        <FaTags className='text-slate-950 font-bold text-lg mr-2 mt-1'/>
                         {order.price} €
                     </div>
                 </div>
+                <div className='flex justify-start items-start mb-2'>
+                    <Link href={`/private/dashboard?product_uuid=${order.product_uuid}`}>
+                        <div className='flex flex-rows transition-all ease-in duration-300 font-bold text-center tetx-sm text-blue-400 cursor-pointer hover:underline'>
+                            <TbShoppingBagSearch className='text-blue-400 font-bold text-xl mr-2'/>
+                            <span>Product</span>
+                        </div>
+                    </Link>
+                </div>
+                
                 
                 
 
@@ -304,7 +338,7 @@ const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders }: { order: Orde
 
                 
 
-                <div className='flex justify-center'>
+                <div className='flex justify-center overflow-auto'>
                     {order.order_status === 'archived' ? (
                         <Button onClick={() => onUnarchive?.(order.order_uuid)} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
                             <HiMiniArchiveBoxXMark className='inline mr-2' /> Unarchive
@@ -312,12 +346,12 @@ const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders }: { order: Orde
                     ) : (
                         <>
                             <div className='flex flex-row space-x-10 mt-2'>
-                                <div className={`flex justify-center items-center ${order.order_status === "canceled" ? "hidden" : ""}`}>
+                                <div className={`flex justify-center items-center ${order.order_status === "cancelled" ? "hidden" : ""}`}>
                                     <Button onClick={handleCancelOrder} className='text-slate-50 bg-red-600 font-bold border border-red-600 rounded-lg hover:bg-transparent hover:text-slate-50'>
                                         <FaTimes className='inline mr-2' />Cancel Order
                                     </Button>
                                 </div>
-                                <div className={`flex justify-center items-center space-x-2 ${order.order_status === "canceled" ? "hidden" : ""}`}>
+                                <div className={`flex justify-center items-center space-x-2 ${order.order_status === "cancelled" ? "hidden" : ""}`}>
                                     <Button onClick={handlePrevState} disabled={order.order_status === 'processing'} className='text-slate-950 bg-white font-bold border border-slate-50 rounded-lg hover:bg-transparent hover:text-slate-50'>
                                         <FaArrowLeft/>
                                     </Button>
@@ -342,7 +376,22 @@ const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders }: { order: Orde
                         </>
                     )}
                 </div>
+                
             </div>
+            <OrderShippingInfo
+                open={isDrawerOpen}
+                onOpenChange={handleOpenChange}
+                email={order.profile_email}
+                country={country}
+                state={state}
+                city={city}
+                address={address}
+                houseNumber={houseNumber}
+                apartmentNumber={apartmentNumber}
+                postalCode={postalCode}
+                phoneNumber={phoneNumber}
+                moreInfo={moreInfo} 
+            />
         </div>
     );
 };
