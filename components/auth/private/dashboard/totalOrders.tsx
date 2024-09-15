@@ -322,7 +322,7 @@ const OrderCard = ({ order, onArchive, onUnarchive, fetchOrders, profile_uuid }:
                     </div>
                 </div>
                 <div className='flex justify-start items-start mb-2'>
-                    <Link href={`/private/dashboard?product_uuid=${order.product_uuid}`}>
+                    <Link href={`/private/dashboard?product_uuid=${order.product_uuid}`}> {/* Sostituire poi con un popup  o un drawer */}
                         <div className='flex flex-rows transition-all ease-in duration-300 font-bold text-center tetx-sm text-blue-400 cursor-pointer hover:underline'>
                             <TbShoppingBagSearch className='text-blue-400 font-bold text-xl mr-2'/>
                             <span>Product</span>
